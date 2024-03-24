@@ -3,7 +3,7 @@ package za.co.bangoma.neural;
 import java.awt.*;
 
 
-public class Car {
+public class Car implements Vehicle {
 
     private int x;
     private int y;
@@ -27,10 +27,6 @@ public class Car {
         return y;
     }
 
-    public void setY(int y) {
-        this.y = y;
-    }
-
     public int getWidth() {
         return width;
     }
@@ -43,4 +39,8 @@ public class Car {
         return color;
     }
 
+    @Override
+    public void moveForward() {
+        this.y--;
+    }
 }

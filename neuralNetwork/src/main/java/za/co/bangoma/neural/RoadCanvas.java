@@ -8,15 +8,15 @@ import java.util.TimerTask;
 
 public class RoadCanvas extends Canvas {
 
-    public static final int POSITION = 75;
+    // Width of my canvas is 200 pixels
     public static final int WIDTH = 200;
     // Set timer of the canvas to be 30fps
     private static final int TIMER_DELAY_IN_MILLISECONDS = 1000 / 30;
     private static final int STARTING_X = WIDTH / 2;
 
-    private int x, y = POSITION;
     private Timer timer;
     private Car myCar;
+    private Car[] traffic;
 
     public RoadCanvas(int canvasSize) {
         setBackground(Color.BLACK);
@@ -28,17 +28,24 @@ public class RoadCanvas extends Canvas {
         // Adding our car object. Drawn from the top left corner
         myCar = new Car(STARTING_X, starting_y, 30, 50, Color.BLUE);
 
+        traffic = new Car[] {
+                new Car(STARTING_X - 40, starting_y, 30, 50, Color.RED),
+                new Car(STARTING_X + 40, starting_y, 30, 50, Color.RED)
+        };
+
+        // Simulate traffic
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                y = myCar.getY();
-                if (y > 0) {
-                    y--; // We move the oval up by decrementing on the y-axis
-                    myCar.setY(y);
-                    repaint();
-                } else {
-                    stopAnimation();
+                for (Car car: traffic) {
+                    int y = car.getY();
+                    if (y > 0) {
+                        car.moveForward(); // We move the square up by decrementing on the y-axis
+                        repaint();
+                    } else {
+                        stopAnimation();
+                    }
                 }
             }
         }, 0, TIMER_DELAY_IN_MILLISECONDS); // Schedule the task to run 30fps
@@ -59,6 +66,13 @@ public class RoadCanvas extends Canvas {
         // Paint the car
         g.setColor(myCar.getColor());
         g.fillRect(myCar.getX(), myCar.getY(), myCar.getWidth(), myCar.getHeight());
+
+        // Paint the traffic
+        for (Car car: this.traffic) {
+            // Paint the car
+            g.setColor(car.getColor());
+            g.fillRect(car.getX(), car.getY(), car.getWidth(), car.getHeight());
+        }
     }
 
     private void stopAnimation() {
