@@ -1,6 +1,6 @@
 package za.co.bangoma.neural;
 
-import java.awt.*;;
+import java.awt.*;
 
 
 public class Car {
@@ -19,11 +19,28 @@ public class Car {
         this.color = color;
     }
 
-    public void paintCar(Graphics g) {
-        System.out.println("The color of the car is " + this.color);
-        g.setColor(this.color);
-        // g.drawRect(this.x, this.y, this.width, this.height);
-        g.fillRect(this.x, this.y, this.width, this.height);
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public Color getColor() {
+        return color;
     }
 
 }

@@ -6,13 +6,10 @@ import java.awt.*; // Abstract Window Toolkit
 
 public class Screen extends Frame {
 
-    Car myCar;
-
+    RoadCanvas roadCanvas;
     final int WIDTH = 600;
     final int HEIGHT = 700;
 
-    int CENTRE_X = WIDTH / 2;
-    int CENTRE_Y = HEIGHT / 2;
 
     // Constructor
     public Screen() {
@@ -26,9 +23,11 @@ public class Screen extends Frame {
         // We need to manually add the button to our frame.
         add(actionButton);
 
-        this.myCar = new Car(CENTRE_X, CENTRE_Y, 30, 50, Color.BLUE); // Drawn from the top left
+        // Adding RoadCanvas
+        roadCanvas = new RoadCanvas(HEIGHT);
+        add(roadCanvas);
 
-        // Set te width and height of our Frame/Screen
+        // Set the width and height of our Frame/Screen
         setSize(WIDTH, HEIGHT);
 
         // Setting the title of our screen
@@ -44,8 +43,8 @@ public class Screen extends Frame {
 
     @Override
     public void paint(Graphics g) {
-        // super.paint(g);
-        myCar.paintCar(g); // Call the paintCar method here
+        // We call the super classes (Frame) paint method here to ensure everything is painted correctly.
+        super.paint(g);
     }
 
 }
