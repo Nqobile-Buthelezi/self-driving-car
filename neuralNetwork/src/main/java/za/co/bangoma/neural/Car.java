@@ -1,9 +1,10 @@
 package za.co.bangoma.neural;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 
 
-public class Car implements Vehicle {
+public class Car implements Vehicle, Drawable {
 
     private int x;
     private int y;
@@ -31,6 +32,7 @@ public class Car implements Vehicle {
         }
     }
 
+    // Getters
     public Controls getControls() {
         return controls;
     }
@@ -55,6 +57,10 @@ public class Car implements Vehicle {
         return color;
     }
 
+    public double getAngle() {
+        return angle;
+    }
+
     @Override
     public void moveForward() {
         this.y--;
@@ -62,21 +68,56 @@ public class Car implements Vehicle {
 
     @Override
     public void move() {
+        updateSpeed();
+        updateAngle();
+        updatePosition();
+    }
+
+    private void updateAngle() {
+        if (this.speed != 0) {
+            // Calculate turning radius based on speed
+            double turningRadius = 100 / this.speed; // Adjust this value as needed for gameplay balance
+
+            // Calculate angle change based on turning radius
+            double angleChange = Math.atan(this.width / turningRadius);
+
+            if (this.controls.isLeft()) {
+                this.angle += angleChange; // Turn left
+            }
+            if (this.controls.isRight()) {
+                this.angle -= angleChange; // Turn right
+            }
+        }
+    }
+
+    private void updatePosition() {
+        // Convert angle to radians
+        double angleInRadians = Math.toRadians(angle);
+        // Calculate change in position based on angle and speed
+        double deltaX = this.speed * Math.sin(angleInRadians);
+        double deltaY = this.speed * Math.cos(angleInRadians);
+        // Update the position
+        this.x -= deltaX;
+        this.y += deltaY; // Note the positive increment in y due to AWT's coordinate system
+    }
+
+
+    private void updateSpeed() {
         // If the upwards key is pressed accelerate or decelerate.
         if (this.controls.isForward()) {
-            this.speed += this.acceleration;
+            this.speed -= this.acceleration;
         }
         if (this.controls.isBack()) {
-            this.speed -= this.acceleration;
+            this.speed += this.acceleration;
         }
 
         // Ensure once maximum speed is achieved it is not exceeded
-        if (this.speed > this.maxSpeed) {
-            this.speed = this.maxSpeed;
+        if (this.speed < -this.maxSpeed) {
+            this.speed = -this.maxSpeed;
         }
         // If half of our maxSpeed is achieved while decelerating cap it a half maxSpeed
-        if (this.speed < (double) -this.maxSpeed / 2) {
-            this.speed = (double) -this.maxSpeed / 2;
+        if (this.speed > (double) this.maxSpeed / 2) {
+            this.speed = (double) this.maxSpeed / 2;
         }
 
         // If our speed increases or decreases let us implement friction in bot directions.
@@ -92,27 +133,16 @@ public class Car implements Vehicle {
         if (Math.abs(this.speed) < this.friction) {
             this.speed = 0;
         }
-
-        // If our speed is greater than zero we will implement turning
-        // functionality. Ordinarily cars cannot turn unless they are in motion
-        // The same rule will apply to our vehicle
-        if (this.speed != 0) {
-            // Convert angle to radians
-            double angleInRadians = Math.toRadians(angle);
-
-            // Update the position based on the angle and speed
-            this.x += Math.sin(angleInRadians) * this.speed;
-            this.y -= Math.cos(angleInRadians) * this.speed;
-
-            int flip = this.speed > 0 ? 1 : -1;
-
-            // Update the angle of the car based on the control inputs.
-            if (this.controls.isLeft()) {
-                this.angle += 0.3 * flip; // Positive angle for turning left
-            }
-            if (this.controls.isRight()) {
-                this.angle -= 0.3 * flip; // negative angle for turning right
-            }
-        }
     }
+
+    @Override
+    public void paint(Graphics2D g2d) {
+        AffineTransform originalTransform = g2d.getTransform();
+        g2d.translate(this.x, this.y); // Translate to the car's position
+        g2d.rotate(Math.toRadians(this.angle), (double) this.width / 2, (double) this.height / 2); // Rotate around the center of the car
+        g2d.setColor(this.color);
+        g2d.fillRect(0, 0, this.width, this.height); // Draw the car
+        g2d.setTransform(originalTransform);
+    }
+
 }

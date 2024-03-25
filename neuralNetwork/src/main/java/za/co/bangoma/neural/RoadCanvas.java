@@ -3,6 +3,9 @@ package za.co.bangoma.neural;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -12,7 +15,7 @@ public class RoadCanvas extends Canvas implements KeyListener {
     // Width of my canvas is 200 pixels
     public static final int WIDTH = 200;
     // Set timer of the canvas to be 30fps
-    private static final int TIMER_DELAY_IN_MILLISECONDS = 1000 / 30;
+    private static final int TIMER_DELAY_IN_MILLISECONDS = 1000 / 66;
     private static final int ROAD_X = 110;
     private static final int ROAD_Y = 0;
 
@@ -21,11 +24,11 @@ public class RoadCanvas extends Canvas implements KeyListener {
     private Car[] traffic;
     private int laneCount;
     private int left;
-    private int right;
+    private ArrayList<Drawable> drawables;
+    private BufferedImage offScreenImage;
 
     public RoadCanvas(int canvasSize, int laneCount) {
         setBackground(Color.BLACK);
-        // setSize(WIDTH, canvasSize);
         setBounds(ROAD_X, ROAD_Y, WIDTH, canvasSize);
 
         int starting_y = canvasSize / 2;
@@ -33,7 +36,7 @@ public class RoadCanvas extends Canvas implements KeyListener {
         this.laneCount = laneCount;
 
         this.left = (int) ((WIDTH - WIDTH * 0.9) / 2);
-        this.right = (int) (WIDTH * 0.9 + (WIDTH * 0.1 / 2));
+        int right = (int) (WIDTH * 0.9 + (WIDTH * 0.1 / 2));
 
         // Adding our car object. Drawn from the top left corner
         myCar = new Car(getLaneCentre(1), starting_y, 30, 50, Color.BLUE, 3, "CONTROL");
@@ -43,63 +46,80 @@ public class RoadCanvas extends Canvas implements KeyListener {
                 new Car(getLaneCentre(2), starting_y, 30, 50, Color.RED, 2, "TRAFFIC")
         };
 
+        this.drawables = new ArrayList<>();
+        this.drawables.add(myCar);
+        this.drawables.addAll(Arrays.asList(traffic));
+
         // Adding keyboard listeners to the canvas, while implementing KeyListener
         addKeyListener(this);
 
-        // Simulate traffic
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                setFocusable(true); // Ensure the canvas can receive keyboard focus
-
-                myCar.move();
-                repaint();
-
-                for (Car vehicle: traffic) {
-                    int y = vehicle.getY();
-                    if (y > 0) {
-                        vehicle.moveForward(); // We move the square up by decrementing on the y-axis
-                        repaint();
-                    } else {
-                        stopAnimation();
-                    }
-                }
-            }
-        }, 0, TIMER_DELAY_IN_MILLISECONDS); // Schedule the task to run 30fps
+        // Add off-screen image with the same dimensions as the canvas
+        offScreenImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
     }
 
     @Override
     public void paint(Graphics g) {
         super.paint(g);
 
+        // Create off-screen graphics context
+        Graphics2D offScreenGraphics = offScreenImage.createGraphics();
+
+        // Paint everything onto the off-screen image
+        paintComponents(offScreenGraphics);
+
+        // Draw the off-screen image onto the canvas
+        g.drawImage(offScreenImage, 0, 0, null);
+
+        // Dispose the off-screen graphics context
+        offScreenGraphics.dispose();
+    }
+
+    public void startAnimation() {
+        // Simulate traffic
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                repaint();
+                setFocusable(true); // Ensure the canvas can receive keyboard focus
+
+                myCar.move();
+
+                for (Car vehicle: traffic) {
+                    int y = vehicle.getY();
+                    if (true) {
+                        vehicle.moveForward(); // We move the square up by decrementing on the y-axis
+                    } else {
+                        stopAnimation();
+                    }
+                }
+
+            }
+        }, 0, TIMER_DELAY_IN_MILLISECONDS); // Schedule the task to run 30fps
+    }
+
+    private void paintComponents(Graphics2D g2d) {
         // paint the boundary lines
-        g.setColor(Color.YELLOW);
+        g2d.setColor(Color.YELLOW);
         // Drawn from top left
-        g.fillRect((int) (getWidth() * 0.02), 0, (int) (getWidth() * 0.96), getHeight());
+        g2d.fillRect((int) (getWidth() * 0.02), 0, (int) (getWidth() * 0.96), getHeight());
 
         // Paint the road
-        g.setColor(Color.BLACK);
+        g2d.setColor(Color.BLACK);
         // Drawn from top left
-        g.fillRect((int) (getWidth() * 0.05), 0, (int) (getWidth() * 0.9), getHeight());
-
-        // Paint the car
-        g.setColor(myCar.getColor());
-        g.fillRect(myCar.getX(), myCar.getY(), myCar.getWidth(), myCar.getHeight());
-
-        // Paint the traffic
-        for (Car car: this.traffic) {
-            // Paint the car
-            g.setColor(car.getColor());
-            g.fillRect(car.getX(), car.getY(), car.getWidth(), car.getHeight());
-        }
+        g2d.fillRect((int) (getWidth() * 0.05), 0, (int) (getWidth() * 0.9), getHeight());
 
         // Paint the lanes
-        g.setColor(Color.WHITE);
+        g2d.setColor(Color.WHITE);
         int laneWidth = (int) ((WIDTH * 0.9) / laneCount);
         int left = (int) (WIDTH * 0.05);
         for (int i = 0; i < laneCount - 1; i++) {
-            drawDashedLine(g, laneWidth + left + laneWidth * i, 0, laneWidth + left + laneWidth * i, getHeight());
+            drawDashedLine(g2d, laneWidth + left + laneWidth * i, 0, laneWidth + left + laneWidth * i, getHeight());
+        }
+
+        // Paint all drawables
+        for (Drawable drawable : this.drawables) {
+            drawable.paint(g2d);
         }
     }
 

@@ -2,6 +2,8 @@ package za.co.bangoma.neural;
 
 // Importing Java AWT to start
 import java.awt.*; // Abstract Window Toolkit
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
 public class Screen extends Frame {
@@ -19,6 +21,13 @@ public class Screen extends Frame {
 
         // Setting my actionButton's position on screen, It's drawn from the bottom left.
         actionButton.setBounds(15, 45, 80, 30); // x pos, y pos, width and height in pixels.
+
+        actionButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                roadCanvas.startAnimation();
+            }
+        });
 
         // We need to manually add the button to our frame.
         add(actionButton);
