@@ -24,7 +24,7 @@ public class Screen extends Frame {
         add(actionButton);
 
         // Adding RoadCanvas
-        roadCanvas = new RoadCanvas(HEIGHT);
+        roadCanvas = new RoadCanvas(HEIGHT, 3);
         add(roadCanvas);
 
         // Set the width and height of our Frame/Screen
