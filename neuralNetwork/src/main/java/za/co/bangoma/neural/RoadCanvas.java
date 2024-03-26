@@ -15,7 +15,7 @@ public class RoadCanvas extends Canvas implements KeyListener {
     // Width of my canvas is 200 pixels
     public static final int WIDTH = 200;
     // Set timer of the canvas to be 30fps
-    private static final int TIMER_DELAY_IN_MILLISECONDS = 1000 / 66;
+    private static final int TIMER_DELAY_IN_MILLISECONDS = 1000 / 72;
     private static final int ROAD_X = 110;
     private static final int ROAD_Y = 0;
 
@@ -24,6 +24,9 @@ public class RoadCanvas extends Canvas implements KeyListener {
     private Car[] traffic;
     private int laneCount;
     private int left;
+
+    // Define road borders
+    private Point[] roadBorders;
     private ArrayList<Drawable> drawables;
     private BufferedImage offScreenImage;
 
@@ -38,13 +41,17 @@ public class RoadCanvas extends Canvas implements KeyListener {
         this.left = (int) ((WIDTH - WIDTH * 0.9) / 2);
         int right = (int) (WIDTH * 0.9 + (WIDTH * 0.1 / 2));
 
-        // Adding our car object. Drawn from the top left corner
-        myCar = new Car(getLaneCentre(1), starting_y, 30, 50, Color.BLUE, 3, "CONTROL");
+        // Calculate road borders
+        calculateRoadBorders();
 
         traffic = new Car[] {
-                new Car(getLaneCentre(0), starting_y, 30, 50, Color.RED, 2, "TRAFFIC"),
-                new Car(getLaneCentre(2), starting_y, 30, 50, Color.RED, 2, "TRAFFIC")
+                new Car(getLaneCentre(0), starting_y, 30, 50, Color.RED, 2, "TRAFFIC", new Point[]{}, new Car[]{}),
+                new Car(getLaneCentre(2), starting_y, 30, 50, Color.RED, 2, "TRAFFIC", new Point[]{}, new Car[]{})
         };
+
+        // Adding our car object. Drawn from the top left corner
+        myCar = new Car(getLaneCentre(1), starting_y, 30, 50, Color.BLUE, 3, "CONTROL", roadBorders, traffic);
+
 
         this.drawables = new ArrayList<>();
         this.drawables.add(myCar);
@@ -55,6 +62,24 @@ public class RoadCanvas extends Canvas implements KeyListener {
 
         // Add off-screen image with the same dimensions as the canvas
         offScreenImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+    }
+
+    public Point[] getRoadBorders() {
+        return roadBorders;
+    }
+
+     void calculateRoadBorders() {
+        int top = 0;
+        int bottom = getHeight();
+        int left = (int) (WIDTH * 0.05);
+        int right = (int) (WIDTH * 0.95);
+
+        roadBorders = new Point[] {
+                new Point(left, top),     // Top left
+                new Point(left, bottom),  // Bottom left
+                new Point(right, top),    // Top right
+                new Point(right, bottom)  // Bottom right
+        };
     }
 
     @Override
@@ -117,9 +142,18 @@ public class RoadCanvas extends Canvas implements KeyListener {
             drawDashedLine(g2d, laneWidth + left + laneWidth * i, 0, laneWidth + left + laneWidth * i, getHeight());
         }
 
-        // Paint all drawables
+        // Paint all cars first
         for (Drawable drawable : this.drawables) {
-            drawable.paint(g2d);
+            if (drawable instanceof Car) {
+                drawable.paint(g2d);
+            }
+        }
+
+        // Paint all sensors next
+        for (Drawable drawable : this.drawables) {
+            if (drawable instanceof Sensor) {
+                drawable.paint(g2d);
+            }
         }
     }
 
@@ -135,7 +169,7 @@ public class RoadCanvas extends Canvas implements KeyListener {
         return this.left + laneWidth / 2 + Math.min(laneIndex, this.laneCount - 1) * laneWidth;
     }
 
-    public void drawDashedLine(Graphics g, int x1, int y1, int x2, int y2){
+    public void drawDashedLine(Graphics g, int x1, int y1, int x2, int y2) {
         // Create a copy of the Graphics instance
         Graphics2D g2d = (Graphics2D) g.create();
         // Set the stroke of the copy, not the original

@@ -2,6 +2,10 @@ package za.co.bangoma.neural;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 
 public class Car implements Vehicle, Drawable {
@@ -12,23 +16,32 @@ public class Car implements Vehicle, Drawable {
     private final int height;
     private final Color color; // It should be colour but it's American spelling 😅
     private Controls controls;
+    private Sensor sensor;
 
     private int maxSpeed;
     private double speed = 0;
     private double acceleration = 0.2;
     private double friction = 0.05;
     private double angle = 0;
+    private Point[] roadBorders;
+    private Car[] traffic;
+    private Point[] polygon;
 
 
-    public Car(int x, int y, int width, int height, Color color, int maxSpeed, String controlType) {
+    public Car(int x, int y, int width, int height, Color color, int maxSpeed, String controlType, Point[] roadBorders, Car[] traffic) {
         this.x = x - width / 2;
         this.y = y - height / 2;
         this.width = width;
         this.height = height;
         this.color = color;
         this.maxSpeed = maxSpeed;
+        this.roadBorders = roadBorders;
+        this.traffic = traffic;
+        this.polygon = createPolygon();
+
         if (controlType.equals("CONTROL")) {
             this.controls = new Controls();
+            this.sensor = new Sensor(this);
         }
     }
 
@@ -61,32 +74,76 @@ public class Car implements Vehicle, Drawable {
         return angle;
     }
 
-    @Override
-    public void moveForward() {
-        this.y--;
+    public Point[] getPolygon() {
+        return this.polygon;
     }
 
-    @Override
-    public void move() {
-        updateSpeed();
-        updateAngle();
-        updatePosition();
+    // Methods
+    // Method to create polygon points
+    private Point[] createPolygon() {
+        ArrayList<Point> points = new ArrayList<>();
+
+        double radius = Math.hypot(this.width, this.height) / 2; // "radius" distance from centre to corner
+        double alpha = Math.atan2(this.width, this.height); // Makes use of the arc tangent method to identify the angle of the "radius"
+
+        // Top right point
+        int topRightX = (int) (this.x - Math.sin(this.angle - alpha) * radius);
+        int topRightY = (int) (this.y - Math.cos(this.angle - alpha) * radius);
+        points.add(new Point(topRightX, topRightY));
+
+        // Top left point
+        int topLeftX = (int) (this.x - Math.sin(this.angle + alpha) * radius);
+        int topLeftY = (int) (this.y - Math.cos(this.angle + alpha) * radius);
+        points.add(new Point(topLeftX, topLeftY));
+
+        // Bottom left point
+        int bottomLeftX = (int) (this.x - Math.sin(Math.PI + this.angle - alpha) * radius);
+        int bottomLeftY = (int) (this.y - Math.cos(Math.PI + this.angle - alpha) * radius);
+        points.add(new Point(bottomLeftX, bottomLeftY));
+
+        // Bottom right point
+        int bottomRightX = (int) (this.x - Math.sin(Math.PI + this.angle + alpha) * radius);
+        int bottomRightY = (int) (this.y - Math.cos(Math.PI + this.angle + alpha) * radius);
+        points.add(new Point(bottomRightX, bottomRightY));
+
+        // Convert ArrayList<Point> to Point[]
+        return points.toArray(new Point[0]);
     }
 
     private void updateAngle() {
         if (this.speed != 0) {
             // Calculate turning radius based on speed
-            double turningRadius = 100 / this.speed; // Adjust this value as needed for gameplay balance
+            // double turningRadius = 100 / this.speed; // Adjust this value as needed for gameplay balance
+            double turningRadius = -(Math.PI / 2);
 
             // Calculate angle change based on turning radius
             double angleChange = Math.atan(this.width / turningRadius);
 
+            // Log the current angle before adjustments
+            // System.out.println("Current Angle: " + this.angle);
+
+            // Adjust angle based on controls
             if (this.controls.isLeft()) {
                 this.angle += angleChange; // Turn left
             }
             if (this.controls.isRight()) {
                 this.angle -= angleChange; // Turn right
             }
+
+            // Ensure angle stays within 0 to 360 degrees range
+            if (this.angle >= 360) {
+                this.angle -= 360;
+            } else if (this.angle < 0) {
+                this.angle += 360;
+            }
+
+            // Log the updated angle
+            // System.out.println("Updated Angle: " + this.angle);
+        }
+
+        // Update sensor angles
+        if (this.sensor != null) {
+            this.sensor.updateAngles(this.angle);
         }
     }
 
@@ -136,6 +193,21 @@ public class Car implements Vehicle, Drawable {
     }
 
     @Override
+    public void moveForward() {
+        this.y--;
+    }
+
+    @Override
+    public void move() {
+        updateSpeed();
+        updateAngle();
+        updatePosition();
+        if (sensor != null) {
+            sensor.update(this.roadBorders, this.traffic); // You need to pass roadBorders and traffic here
+        }
+    }
+
+    @Override
     public void paint(Graphics2D g2d) {
         AffineTransform originalTransform = g2d.getTransform();
         g2d.translate(this.x, this.y); // Translate to the car's position
@@ -143,6 +215,10 @@ public class Car implements Vehicle, Drawable {
         g2d.setColor(this.color);
         g2d.fillRect(0, 0, this.width, this.height); // Draw the car
         g2d.setTransform(originalTransform);
+
+//        if (this.sensor != null && !this.sensor.getRays().isEmpty()) {
+//            this.sensor.drawSensors(g2d);
+//        }
     }
 
 }

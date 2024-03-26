@@ -6,6 +6,7 @@ public class Controls {
 
     private boolean forward, back, left, right;
 
+    // Getters
     public boolean isForward() {
         return forward;
     }
