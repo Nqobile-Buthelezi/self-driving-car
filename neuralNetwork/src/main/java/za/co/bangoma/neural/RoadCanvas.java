@@ -26,13 +26,13 @@ public class RoadCanvas extends Canvas implements KeyListener {
     private int left;
 
     // Define road borders
-    private Point[] roadBorders;
+    private ArrayList<Point[]> roadBorders;
     private ArrayList<Drawable> drawables;
     private BufferedImage offScreenImage;
 
     public RoadCanvas(int canvasSize, int laneCount) {
         setBackground(Color.BLACK);
-        setBounds(ROAD_X, ROAD_Y, WIDTH, canvasSize);
+        setBounds(ROAD_X, ROAD_Y, WIDTH, canvasSize); // canvasSize is 700
 
         int starting_y = canvasSize / 2;
 
@@ -45,8 +45,9 @@ public class RoadCanvas extends Canvas implements KeyListener {
         calculateRoadBorders();
 
         traffic = new Car[] {
-                new Car(getLaneCentre(0), starting_y, 30, 50, Color.RED, 2, "TRAFFIC", new Point[]{}, new Car[]{}),
-                new Car(getLaneCentre(2), starting_y, 30, 50, Color.RED, 2, "TRAFFIC", new Point[]{}, new Car[]{})
+                new Car(getLaneCentre(0), starting_y, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(2), starting_y, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(1), starting_y - 80, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{})
         };
 
         // Adding our car object. Drawn from the top left corner
@@ -64,7 +65,7 @@ public class RoadCanvas extends Canvas implements KeyListener {
         offScreenImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
     }
 
-    public Point[] getRoadBorders() {
+    public ArrayList<Point[]> getRoadBorders() {
         return roadBorders;
     }
 
@@ -74,12 +75,18 @@ public class RoadCanvas extends Canvas implements KeyListener {
         int left = (int) (WIDTH * 0.05);
         int right = (int) (WIDTH * 0.95);
 
-        roadBorders = new Point[] {
+        ArrayList<Point[]> roadBarrier = new ArrayList<>();
+
+        roadBarrier.add(new Point[] {
                 new Point(left, top),     // Top left
-                new Point(left, bottom),  // Bottom left
+                new Point(left, bottom)  // Bottom left
+        });
+        roadBarrier.add(new Point[] {
                 new Point(right, top),    // Top right
                 new Point(right, bottom)  // Bottom right
-        };
+        });
+
+        roadBorders = roadBarrier;
     }
 
     @Override
@@ -124,6 +131,10 @@ public class RoadCanvas extends Canvas implements KeyListener {
     }
 
     private void paintComponents(Graphics2D g2d) {
+        // paint Road to the width of the canvas
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(0, 0, getWidth(), getHeight());
+
         // paint the boundary lines
         g2d.setColor(Color.YELLOW);
         // Drawn from top left
