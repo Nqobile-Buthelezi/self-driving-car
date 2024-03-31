@@ -1,7 +1,6 @@
 package za.co.bangoma.neural;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class Utils {
@@ -10,59 +9,41 @@ public class Utils {
         return A + (B - A) * t;
     }
 
-    public static boolean polysIntersect(ArrayList<Point> poly1, Point[] poly2) {
-        for (int i = 0; i < poly1.size(); i++) {
-            for (int k = 0; k < poly2.length; k++) {
-                Hashtable touch;
-                touch = getIntersection(
-                        poly1.get(i),
-                        poly1.get((i + 1) % poly1.size()),
-                        poly2[k],
-                        poly2[(k + 1) % poly2.length]
-                );
-                if (touch != null) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public static boolean trafficIntersect(ArrayList<Point> poly1, ArrayList<Point> poly2) {
-        for (int i = 0; i < poly1.size(); i++) {
-            for (int k = 0; k < poly2.size(); k++) {
-                Hashtable touch;
-                touch = getIntersection(
-                        poly1.get(i),
-                        poly1.get((i + 1) % poly1.size()),
-                        poly2.get(k),
-                        poly2.get((k + 1) % poly2.size())
-                );
-                if (touch != null) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static Hashtable getIntersection(Point A, Point B, Point C, Point D) {
+    public static Hashtable<String, Double> getIntersection(Point A, Point B, Point C, Point D) {
+        // Calculate the numerator of the equations for t and u
         double tTop = (D.getX() - C.getX()) * (A.getY() - C.getY()) - (D.getY() - C.getY()) * (A.getX() - C.getX());
         double uTop = (C.getY() - A.getY()) * (A.getX() - B.getX()) - (C.getX() - A.getX()) * (A.getY() - B.getY());
-        double bottom = (D.getY() - C.getY()) * (B.getX() - A.getX()) - (D.getX() - C.getX()) * (B.getY() - A.getY());;
+        // Calculate the denominator of the equations
+        double bottom = (D.getY() - C.getY()) * (B.getX() - A.getX()) - (D.getX() - C.getX()) * (B.getY() - A.getY());
 
+        // Check if the denominator is not equal to zero (to avoid division by zero)
         if (bottom != 0) {
+            // Calculate the parameters t and u
             double t = tTop / bottom;
             double u = uTop / bottom;
 
-            if (t >= 0 && t<= 1 && u >= 0 && u <= 1) {
-                Hashtable result = new Hashtable<>();
-                result.put("x", linearInterpolation(A.getX(), B.getX(), t));
-                result.put("y", linearInterpolation(A.getY(), B.getY(), t));
-                result.put("offset", t);
+            // Check if t and u are within the range [0, 1] to ensure intersection is
+            // within line segments AB and CD
+            if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+                // If the intersection point lies within the line segments,
+                // create a Hashtable to store the result.
+                Hashtable<String, Double> result = getStringDoubleHashtable(A, B, t);
+                // Return the Hashtable containing the intersection point coordinates
                 return result;
             }
         }
+        // If no intersection point found or denominator is zero, return null
         return null;
     }
+
+    private static Hashtable<String, Double> getStringDoubleHashtable(Point A, Point B, double t) {
+        Hashtable<String, Double> result = new Hashtable<>();
+        // Use linear interpolation to find the coordinates of the intersection point
+        result.put("x", linearInterpolation(A.getX(), B.getX(), t));
+        result.put("y", linearInterpolation(A.getY(), B.getY(), t));
+        // Store the parameter t as an offset for further calculations
+        result.put("offset", t);
+        return result;
+    }
+
 }

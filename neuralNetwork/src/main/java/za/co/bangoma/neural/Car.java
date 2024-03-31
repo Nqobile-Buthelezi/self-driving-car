@@ -41,6 +41,7 @@ public class Car implements Vehicle, Drawable {
         if (controlType.equals("CONTROL")) {
             this.controls = new Controls();
             this.sensor = new Sensor(this);
+            this.sensor.update(this.roadBorders, this.traffic);
         }
     }
 
@@ -49,8 +50,28 @@ public class Car implements Vehicle, Drawable {
         return controls;
     }
 
+    public double getAngle() {
+        return angle;
+    }
+
     public int getY() {
         return y;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public ArrayList<Point> getPolygon() {
+        return polygon;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     // Method/s
@@ -60,12 +81,6 @@ public class Car implements Vehicle, Drawable {
         // Calculate the initial points relative to the center of the car
         double halfWidth = this.width / 2.0;
         double halfHeight = this.height / 2.0;
-
-        // Calculate the initial center point of the car's bounding box
-        int centerX = this.x + this.width / 2;
-        int centerY = this.y + this.height / 2;
-
-        System.out.println("Center before rotation - X: " + centerX + ", Y: " + centerY);
 
         Point topRight = new Point((int) (halfWidth + halfWidth), (int) (-halfHeight + halfHeight));
         Point topLeft = new Point((int) (-halfWidth + halfWidth), (int) (-halfHeight + halfHeight));
@@ -92,20 +107,8 @@ public class Car implements Vehicle, Drawable {
         points.add(bottomLeft);
         points.add(bottomRight);
 
-        if (this.controlType.equals("CONTROL")) {
-            System.out.println("The top right x coordinate is: " + topRight.x);
-            System.out.println("The top right y coordinate is: " + topRight.y);
-            System.out.println("The top left x coordinate is: " + topLeft.x);
-            System.out.println("The top left y coordinate is: " + topLeft.y);
-            System.out.println("The bottom left x coordinate is: " + bottomLeft.x);
-            System.out.println("The bottom left y coordinate is: " + bottomLeft.y);
-            System.out.println("The bottom right x coordinate is: " + bottomRight.x);
-            System.out.println("The bottom right y coordinate of is: " + bottomRight.y);
-        }
-
         return points;
     }
-
 
     private void updateAngle() {
         if (this.speed != 0) {
@@ -181,15 +184,18 @@ public class Car implements Vehicle, Drawable {
     @Override
     public void moveForward() {
         this.y--;
+        this.polygon = createPolygon();
     }
 
     @Override
     public void move() {
-
         updateSpeed();
         updateAngle();
         this.polygon = createPolygon();
         updatePosition();
+        if (this.controlType.equals("CONTROL")) {
+            this.sensor.update(this.roadBorders, this.traffic);
+        }
     }
 
     @Override
@@ -212,6 +218,13 @@ public class Car implements Vehicle, Drawable {
         myColours.add(Color.BLUE);
         myColours.add(Color.GREEN);
 
+        // Define the desired thickness of the lines
+        float strokeWidth = 2.0f; // You can adjust this value to increase or decrease the thickness
+
+        // Create a new BasicStroke with the desired thickness
+        Stroke oldStroke = g2d.getStroke(); // Save the old stroke to restore it later
+        g2d.setStroke(new BasicStroke(strokeWidth));
+
         for (int i = 0; i < polygon.size(); i++) {
             Point currentPoint = polygon.get(i);
 
@@ -233,7 +246,13 @@ public class Car implements Vehicle, Drawable {
                 );
             }
         }
-    }
 
+        g2d.setStroke(oldStroke);
+
+        // Draw the sensor
+        if (this.controlType.equals("CONTROL")) {
+            this.sensor.draw(g2d);
+        }
+    }
 
 }

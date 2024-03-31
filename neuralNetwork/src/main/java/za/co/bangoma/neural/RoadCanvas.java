@@ -55,8 +55,9 @@ public class RoadCanvas extends Canvas implements KeyListener {
 
 
         this.drawables = new ArrayList<>();
-        this.drawables.add(myCar);
+
         this.drawables.addAll(Arrays.asList(traffic));
+        this.drawables.add(myCar);
 
         // Adding keyboard listeners to the canvas, while implementing KeyListener
         addKeyListener(this);
@@ -132,7 +133,7 @@ public class RoadCanvas extends Canvas implements KeyListener {
 
     private void paintComponents(Graphics2D g2d) {
         // paint Road to the width of the canvas
-        g2d.setColor(Color.BLACK);
+        g2d.setColor(Color.DARK_GRAY);
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
         // paint the boundary lines
@@ -141,7 +142,7 @@ public class RoadCanvas extends Canvas implements KeyListener {
         g2d.fillRect((int) (getWidth() * 0.02), 0, (int) (getWidth() * 0.96), getHeight());
 
         // Paint the road
-        g2d.setColor(Color.BLACK);
+        g2d.setColor(Color.DARK_GRAY);
         // Drawn from top left
         g2d.fillRect((int) (getWidth() * 0.05), 0, (int) (getWidth() * 0.9), getHeight());
 
