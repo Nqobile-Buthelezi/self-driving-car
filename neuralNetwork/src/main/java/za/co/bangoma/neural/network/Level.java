@@ -19,7 +19,8 @@ public class Level {
         this.weights = new ArrayList<>();
 
         for (int i = 0; i < inputNeuronCount; i++) {
-            this.weights.get(i).add(i, new ArrayList<>(outputNeuronCount));
+            this.weights.add(new ArrayList<>(outputNeuronCount));
+            // this.weights.get(i).add(i, new ArrayList<>(outputNeuronCount));
         }
 
         Level.randomize(this); // The American spelling really is terrible but standard
