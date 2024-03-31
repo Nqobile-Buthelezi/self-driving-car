@@ -24,6 +24,7 @@ public class Car implements Vehicle, Drawable {
     private Car[] traffic;
     private ArrayList<Point> polygon;
     private String controlType;
+    private boolean damaged = false;
 
 
     public Car(int x, int y, int width, int height, Color color, int maxSpeed, String controlType, ArrayList<Point[]> roadBorders, Car[] traffic) {
@@ -75,6 +76,21 @@ public class Car implements Vehicle, Drawable {
     }
 
     // Method/s
+    private boolean assessDamage() {
+        for (int i = 0; i < roadBorders.size(); i++) {
+            if (Utils.carAndBorderIntersect(this.polygon, roadBorders.get(i))) {
+                return true;
+            }
+        }
+
+        for (int i = 0; i < traffic.length; i++) {
+            if (Utils.carAndTrafficIntersect(this.polygon, traffic[i].polygon)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private ArrayList<Point> createPolygon() {
         ArrayList<Point> points = new ArrayList<>();
 
@@ -108,6 +124,10 @@ public class Car implements Vehicle, Drawable {
         points.add(bottomRight);
 
         return points;
+    }
+
+    private void stop() {
+        this.speed = 0;
     }
 
     private void updateAngle() {
@@ -181,25 +201,7 @@ public class Car implements Vehicle, Drawable {
         }
     }
 
-    @Override
-    public void moveForward() {
-        this.y--;
-        this.polygon = createPolygon();
-    }
-
-    @Override
-    public void move() {
-        updateSpeed();
-        updateAngle();
-        this.polygon = createPolygon();
-        updatePosition();
-        if (this.controlType.equals("CONTROL")) {
-            this.sensor.update(this.roadBorders, this.traffic);
-        }
-    }
-
-    @Override
-    public void paint(Graphics2D g2d) {
+    private void paintCarAndSensor(Graphics2D g2d) {
         AffineTransform originalTransform = g2d.getTransform();
         // Translate to the car's position
         g2d.translate(this.x + this.width / 2, this.y + this.height / 2);
@@ -252,6 +254,52 @@ public class Car implements Vehicle, Drawable {
         // Draw the sensor
         if (this.controlType.equals("CONTROL")) {
             this.sensor.draw(g2d);
+        }
+    }
+
+    private void paintDamagedCar(Graphics2D g2d) {
+        AffineTransform originalTransform = g2d.getTransform();
+        // Translate to the car's position
+        g2d.translate(this.x + this.width / 2, this.y + this.height / 2);
+        // Rotate around the center of the car's bounding box
+        g2d.rotate(Math.toRadians(this.angle), 0, 0); // Rotate around (0, 0)
+
+        g2d.setColor(Color.GRAY);
+        // Draw the car
+        g2d.fillRect(-this.width / 2, -this.height / 2, this.width, this.height); // Draw centered at (0, 0)
+
+        g2d.setTransform(originalTransform);
+    }
+
+    @Override
+    public void moveForward() {
+        this.y--;
+        this.polygon = createPolygon();
+    }
+
+    @Override
+    public void move() {
+        if (this.damaged == false) {
+                updateSpeed();
+                updateAngle();
+                this.polygon = createPolygon();
+                updatePosition();
+                if (this.controlType.equals("CONTROL")) {
+                    this.sensor.update(this.roadBorders, this.traffic);
+                }
+
+            this.damaged = assessDamage();
+        } else {
+            stop();
+        }
+    }
+
+    @Override
+    public void paint(Graphics2D g2d) {
+        if (damaged) {
+            paintDamagedCar(g2d);
+        } else {
+            paintCarAndSensor(g2d);
         }
     }
 

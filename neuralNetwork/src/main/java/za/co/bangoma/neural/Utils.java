@@ -1,6 +1,7 @@
 package za.co.bangoma.neural;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class Utils {
@@ -46,4 +47,38 @@ public class Utils {
         return result;
     }
 
+
+    public static boolean carAndBorderIntersect(ArrayList<Point> polygon, Point[] points) {
+        for (int i = 0; i < polygon.size(); i++) {
+            for (int k = 0; k < points.length; k++) {
+                Hashtable<String, Double> touch = getIntersection(
+                    polygon.get(i),
+                        polygon.get((i + 1) % polygon.size()),
+                        points[k],
+                        points[(k + 1) % points.length]
+                );
+                if (touch != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean carAndTrafficIntersect(ArrayList<Point> polygon, ArrayList<Point> polygon1) {
+        for (int i = 0; i < polygon.size(); i++) {
+            for (int k = 0; k < polygon1.size(); k++) {
+                Hashtable<String, Double> touch = getIntersection(
+                        polygon.get(i),
+                        polygon.get((i + 1) % polygon.size()),
+                        polygon1.get(k),
+                        polygon1.get((k + 1) % polygon1.size())
+                );
+                if (touch != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

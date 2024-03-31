@@ -9,7 +9,8 @@ import java.awt.event.ActionListener;
 public class Screen extends Frame {
 
     RoadCanvas roadCanvas;
-    final int WIDTH = 600;
+    NetworkCanvas networkCanvas;
+    final int WIDTH = 775;
     final int HEIGHT = 700;
 
 
@@ -35,6 +36,9 @@ public class Screen extends Frame {
         // Adding RoadCanvas
         roadCanvas = new RoadCanvas(HEIGHT, 3);
         add(roadCanvas);
+
+        networkCanvas = new NetworkCanvas(HEIGHT);
+        add(networkCanvas);
 
         // Set the width and height of our Frame/Screen
         setSize(WIDTH, HEIGHT);
