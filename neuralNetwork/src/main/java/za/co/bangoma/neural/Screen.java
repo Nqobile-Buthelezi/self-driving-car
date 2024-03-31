@@ -1,6 +1,9 @@
 package za.co.bangoma.neural;
 
 // Importing Java AWT to start
+import za.co.bangoma.neural.network.NetworkCanvas;
+import za.co.bangoma.neural.road.RoadCanvas;
+
 import java.awt.*; // Abstract Window Toolkit
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,7 +14,7 @@ public class Screen extends Frame {
     RoadCanvas roadCanvas;
     NetworkCanvas networkCanvas;
     final int WIDTH = 775;
-    final int HEIGHT = 700;
+    final int HEIGHT = 720;
 
 
     // Constructor

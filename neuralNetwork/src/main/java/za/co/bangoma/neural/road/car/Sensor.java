@@ -1,5 +1,7 @@
-package za.co.bangoma.neural;
+package za.co.bangoma.neural.road.car;
 
+
+import za.co.bangoma.neural.Utils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -7,6 +9,7 @@ import java.util.Hashtable;
 
 public class Sensor {
 
+    // Attributes
     private Car car;
     private int rayCount;
     private double raySpread;
@@ -14,6 +17,7 @@ public class Sensor {
     private ArrayList<RayCoordinates> rays;
     private ArrayList<Hashtable<String, Double>> readings;
 
+    // Constructor
     public Sensor(Car car) {
         this.car = car;
         this.rayCount = 5;
@@ -21,6 +25,24 @@ public class Sensor {
         this.raySpread = Math.PI / 2;
     }
 
+    // Getters
+    public int getRayCount() {
+        return rayCount;
+    }
+
+    public double getRaySpread() {
+        return raySpread;
+    }
+
+    public int getRayLength() {
+        return rayLength;
+    }
+
+    public ArrayList<RayCoordinates> getRays() {
+        return rays;
+    }
+
+    // Methods
     private void castRays() {
         this.rays = new ArrayList<>();
 

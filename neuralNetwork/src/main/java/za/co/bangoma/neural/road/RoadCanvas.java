@@ -1,4 +1,8 @@
-package za.co.bangoma.neural;
+package za.co.bangoma.neural.road;
+
+import za.co.bangoma.neural.road.car.Car;
+import za.co.bangoma.neural.road.car.Drawable;
+import za.co.bangoma.neural.road.car.Sensor;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -29,7 +33,10 @@ public class RoadCanvas extends Canvas implements KeyListener {
 
     // Define road borders
     private ArrayList<Point[]> roadBorders;
+    // Defines our drawables :)
     private ArrayList<Drawable> drawables;
+    // Creates an off-screen image to be rendered
+    // onto the canvas to be utilised many times per second for the animation
     private BufferedImage offScreenImage;
 
     public RoadCanvas(int canvasSize, int laneCount) {
@@ -66,10 +73,6 @@ public class RoadCanvas extends Canvas implements KeyListener {
 
         // Add off-screen image with the same dimensions as the canvas
         offScreenImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
-    }
-
-    public ArrayList<Point[]> getRoadBorders() {
-        return roadBorders;
     }
 
      void calculateRoadBorders() {

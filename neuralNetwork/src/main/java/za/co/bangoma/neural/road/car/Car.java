@@ -1,4 +1,7 @@
-package za.co.bangoma.neural;
+package za.co.bangoma.neural.road.car;
+
+import za.co.bangoma.neural.*;
+import za.co.bangoma.neural.network.Network;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -25,6 +28,7 @@ public class Car implements Vehicle, Drawable {
     private ArrayList<Point> polygon;
     private String controlType;
     private boolean damaged = false;
+    private Network brain;
 
 
     public Car(int x, int y, int width, int height, Color color, int maxSpeed, String controlType, ArrayList<Point[]> roadBorders, Car[] traffic) {
@@ -43,6 +47,7 @@ public class Car implements Vehicle, Drawable {
             this.controls = new Controls();
             this.sensor = new Sensor(this);
             this.sensor.update(this.roadBorders, this.traffic);
+            this.brain = new Network(new Integer[] {this.sensor.getRayCount(), 6, 4});
         }
     }
 
@@ -279,7 +284,7 @@ public class Car implements Vehicle, Drawable {
 
     @Override
     public void move() {
-        if (this.damaged == false) {
+        if (!this.damaged) {
                 updateSpeed();
                 updateAngle();
                 this.polygon = createPolygon();

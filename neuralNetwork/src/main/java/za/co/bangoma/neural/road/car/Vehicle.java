@@ -1,4 +1,4 @@
-package za.co.bangoma.neural;
+package za.co.bangoma.neural.road.car;
 
 public interface Vehicle {
 
