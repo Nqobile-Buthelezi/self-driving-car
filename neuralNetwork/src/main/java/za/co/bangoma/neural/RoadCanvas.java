@@ -18,6 +18,8 @@ public class RoadCanvas extends Canvas implements KeyListener {
     private static final int TIMER_DELAY_IN_MILLISECONDS = 1000 / 72;
     private static final int ROAD_X = 110;
     private static final int ROAD_Y = 0;
+    int ROAD_TOP = -100000;
+    int ROAD_BOTTOM = 100000;
 
     private Timer timer;
     private Car myCar;
@@ -71,8 +73,8 @@ public class RoadCanvas extends Canvas implements KeyListener {
     }
 
      void calculateRoadBorders() {
-        int top = 0;
-        int bottom = getHeight();
+        int top = ROAD_TOP;
+        int bottom = ROAD_BOTTOM;
         int left = (int) (WIDTH * 0.05);
         int right = (int) (WIDTH * 0.95);
 
@@ -132,26 +134,31 @@ public class RoadCanvas extends Canvas implements KeyListener {
     }
 
     private void paintComponents(Graphics2D g2d) {
+        // Calculate the translation to center the car vertically on the screen
+        int carYTranslation = getHeight() / 2 - myCar.getY();
+
+        // Translate the graphics context to center the car vertically
+        g2d.translate(0, carYTranslation);
+
         // paint Road to the width of the canvas
         g2d.setColor(Color.DARK_GRAY);
-        g2d.fillRect(0, 0, getWidth(), getHeight());
+        g2d.fillRect(0, ROAD_TOP, getWidth(), ROAD_BOTTOM - ROAD_TOP);
 
         // paint the boundary lines
         g2d.setColor(Color.YELLOW);
         // Drawn from top left
-        g2d.fillRect((int) (getWidth() * 0.02), 0, (int) (getWidth() * 0.96), getHeight());
+        g2d.fillRect((int) (getWidth() * 0.02), ROAD_TOP, (int) (getWidth() * 0.96), ROAD_BOTTOM - ROAD_TOP);
 
         // Paint the road
         g2d.setColor(Color.DARK_GRAY);
-        // Drawn from top left
-        g2d.fillRect((int) (getWidth() * 0.05), 0, (int) (getWidth() * 0.9), getHeight());
+        g2d.fillRect((int) (getWidth() * 0.05), ROAD_TOP, (int) (getWidth() * 0.9), ROAD_BOTTOM - ROAD_TOP);
 
         // Paint the lanes
         g2d.setColor(Color.WHITE);
         int laneWidth = (int) ((WIDTH * 0.9) / laneCount);
         int left = (int) (WIDTH * 0.05);
         for (int i = 0; i < laneCount - 1; i++) {
-            drawDashedLine(g2d, laneWidth + left + laneWidth * i, 0, laneWidth + left + laneWidth * i, getHeight());
+            drawDashedLine(g2d, laneWidth + left + laneWidth * i, ROAD_TOP, laneWidth + left + laneWidth * i, ROAD_BOTTOM - ROAD_TOP);
         }
 
         // Paint all cars first
@@ -167,6 +174,9 @@ public class RoadCanvas extends Canvas implements KeyListener {
                 drawable.paint(g2d);
             }
         }
+
+        // Reset the translation to ensure other components are drawn normally
+        g2d.translate(0, -carYTranslation);
     }
 
     private void stopAnimation() {

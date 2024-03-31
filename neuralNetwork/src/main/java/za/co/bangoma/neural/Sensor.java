@@ -138,11 +138,17 @@ public class Sensor {
             end.put("x", this.rays.get(i).getEndX());
             end.put("y", this.rays.get(i).getEndY());
 
-            // If there is a reading coordinate of the intercept
-            // make that coordinate our new end coordinate
-            if (this.readings.get(i) != null) {
-                end.put("x", this.readings.get(i).get("x"));
-                end.put("y", this.readings.get(i).get("y"));
+            if (i >= this.readings.size()) {
+                // index does not exist
+                continue;
+            } else {
+                // index exists
+                // If there is a reading coordinate of the intercept
+                // make that coordinate our new end coordinate
+                if (this.readings.get(i) != null) {
+                    end.put("x", this.readings.get(i).get("x"));
+                    end.put("y", this.readings.get(i).get("y"));
+                }
             }
 
             graphics2D.setColor(Color.YELLOW);
