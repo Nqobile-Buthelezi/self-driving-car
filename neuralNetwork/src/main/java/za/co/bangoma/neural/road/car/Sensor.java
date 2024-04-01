@@ -42,6 +42,10 @@ public class Sensor {
         return rays;
     }
 
+    public ArrayList<Hashtable<String, Double>> getOffsetReadings() {
+        return readings;
+    }
+
     // Methods
     private void castRays() {
         this.rays = new ArrayList<>();

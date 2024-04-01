@@ -1,11 +1,13 @@
 package za.co.bangoma.neural.road.car;
 
 import za.co.bangoma.neural.*;
-import za.co.bangoma.neural.network.Network;
+import za.co.bangoma.neural.network.NeuralNetwork;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
 
 
 public class Car implements Vehicle, Drawable {
@@ -28,7 +30,7 @@ public class Car implements Vehicle, Drawable {
     private ArrayList<Point> polygon;
     private String controlType;
     private boolean damaged = false;
-    private Network brain;
+    private NeuralNetwork brain;
 
 
     public Car(int x, int y, int width, int height, Color color, int maxSpeed, String controlType, ArrayList<Point[]> roadBorders, Car[] traffic) {
@@ -47,7 +49,7 @@ public class Car implements Vehicle, Drawable {
             this.controls = new Controls();
             this.sensor = new Sensor(this);
             this.sensor.update(this.roadBorders, this.traffic);
-            this.brain = new Network(new Integer[] {this.sensor.getRayCount(), 6, 4});
+            this.brain = new NeuralNetwork(new Integer[] {this.sensor.getRayCount(), 6, 4});
         }
     }
 
@@ -291,6 +293,15 @@ public class Car implements Vehicle, Drawable {
                 updatePosition();
                 if (this.controlType.equals("CONTROL")) {
                     this.sensor.update(this.roadBorders, this.traffic);
+
+                    ArrayList<Double> sensorOffsetArray = new ArrayList<>();
+
+                    for (Hashtable<String, Double> reading: this.sensor.getOffsetReadings()) {
+                        double sensorOffset = reading.get("offset");
+                        sensorOffsetArray.add(sensorOffset);
+                    }
+
+                    ArrayList<Double> outputs = NeuralNetwork.feedForward(sensorOffsetArray, this.brain);
                 }
 
             this.damaged = assessDamage();

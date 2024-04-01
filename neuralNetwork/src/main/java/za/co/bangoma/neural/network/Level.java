@@ -8,22 +8,27 @@ public class Level {
     ArrayList<Double> inputs;
     ArrayList<Double> outputs;
     ArrayList<Double> biases;
-    ArrayList<ArrayList<Object>> weights;
+    ArrayList<ArrayList<Double>> weights;
+    private int inputCount;
+    private int outputCount;
 
     // Constructor
     public Level(int inputNeuronCount, int outputNeuronCount) {
+        setInputCount(inputNeuronCount);
+        setOutputCount(outputNeuronCount);
+
         this.inputs = new ArrayList<>(inputNeuronCount);
         this.outputs = new ArrayList<>(outputNeuronCount);
         this.biases = new ArrayList<>(outputNeuronCount);
 
-        this.weights = new ArrayList<>();
+        this.weights = new ArrayList<>(outputNeuronCount);
 
         for (int i = 0; i < inputNeuronCount; i++) {
-            this.weights.add(new ArrayList<>(outputNeuronCount));
+            this.weights.add(new ArrayList<Double>(outputNeuronCount));
             // this.weights.get(i).add(i, new ArrayList<>(outputNeuronCount));
         }
 
-        Level.randomize(this); // The American spelling really is terrible but standard
+        randomize(); // The American spelling really is terrible but standard
     }
 
     // Getters
@@ -39,21 +44,38 @@ public class Level {
         return biases;
     }
 
-    public ArrayList<ArrayList<Object>> getWeights() {
+    public ArrayList<ArrayList<Double>> getWeights() {
         return weights;
     }
 
+    public int getInputCount() {
+        return inputCount;
+    }
+
+    public void setInputCount(int inputCount) {
+        this.inputCount = inputCount;
+    }
+
+    public int getOutputCount() {
+        return outputCount;
+    }
+
+    public void setOutputCount(int outputCount) {
+        this.outputCount = outputCount;
+    }
+
     // Methods
-    private static void randomize(Level level) {
-        for (int i = 0; i < level.inputs.size(); i++) {
-            for (int k = 0; k < level.outputs.size(); k++) {
+    private void randomize() {
+        for (int i = 0; i < getInputCount(); i++) {
+            // for each input create a weight for each output neuron
+            for (int k = 0; k < getOutputCount(); k++) {
                 // Generate a value between -1 and 1 for the weight
-                level.weights.get(i).add(k, Math.random() * 2 - 1);
+                weights.get(i).add(k, Math.random() * 2 - 1);
             }
         }
 
-        for (int i = 0; i < level.biases.size(); i++) {
-            level.biases.add(i, Math.random() * 2 - 1);
+        for (int i = 0; i < getOutputCount(); i++) {
+            biases.add(i, Math.random() * 2 - 1);
         }
     }
 
@@ -66,7 +88,7 @@ public class Level {
             double sum = 0;
 
             for (int j = 0; j < level.inputs.size(); j++) {
-                ArrayList<Object> currentWeight = level.weights.get(j);
+                ArrayList<Double> currentWeight = level.weights.get(j);
                 sum += level.inputs.get(i) * (double) currentWeight.get(i);
             }
 

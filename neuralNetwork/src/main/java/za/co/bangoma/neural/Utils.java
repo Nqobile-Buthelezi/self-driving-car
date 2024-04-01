@@ -10,6 +10,15 @@ public class Utils {
         return A + (B - A) * t;
     }
 
+    public static Color getRGBA(Double value) {
+        int alpha = (int) Math.abs(value * 255);
+        int R = value < 0 ? 0 : 255;
+        int G = R;
+        int B = value > 0 ? 0 : 255;
+
+        return new Color(R, G, B, alpha);
+    }
+
     public static Hashtable<String, Double> getIntersection(Point A, Point B, Point C, Point D) {
         // Calculate the numerator of the equations for t and u
         double tTop = (D.getX() - C.getX()) * (A.getY() - C.getY()) - (D.getY() - C.getY()) * (A.getX() - C.getX());
