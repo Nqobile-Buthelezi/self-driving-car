@@ -39,6 +39,10 @@ public class RoadCanvas extends Canvas implements KeyListener {
     // onto the canvas to be utilised many times per second for the animation
     private BufferedImage offScreenImage;
 
+    public Car getMyCar() {
+        return myCar;
+    }
+
     public RoadCanvas(int canvasSize, int laneCount) {
         setBackground(Color.BLACK);
         setBounds(ROAD_X, ROAD_Y, WIDTH, canvasSize); // canvasSize is 700
@@ -60,7 +64,7 @@ public class RoadCanvas extends Canvas implements KeyListener {
         };
 
         // Adding our car object. Drawn from the top left corner
-        myCar = new Car(getLaneCentre(1), starting_y, 30, 50, Color.BLUE, 3, "CONTROL", roadBorders, traffic);
+        myCar = new Car(getLaneCentre(1), starting_y, 30, 50, Color.BLUE, 3, "AI", roadBorders, traffic);
 
 
         this.drawables = new ArrayList<>();
@@ -214,11 +218,15 @@ public class RoadCanvas extends Canvas implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        myCar.getControls().keyPressed(e);
+        if (myCar.getControls() != null) {
+            myCar.getControls().keyPressed(e);
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        myCar.getControls().keyReleased(e);
+        if (myCar.getControls() != null) {
+            myCar.getControls().keyReleased(e);
+        }
     }
 }

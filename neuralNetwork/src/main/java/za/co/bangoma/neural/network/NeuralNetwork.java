@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class NeuralNetwork {
 
     // Attributes
-    private static ArrayList<Level> levels;
+    private ArrayList<Level> levels;
 
     // Constructor
     public NeuralNetwork(Integer[] neuronCounts) {
@@ -16,7 +16,7 @@ public class NeuralNetwork {
     }
 
     // Getter/s
-    public static ArrayList<Level> getLevels() {
+    public ArrayList<Level> getLevels() {
         return levels;
     }
 
@@ -31,7 +31,9 @@ public class NeuralNetwork {
     }
 
     public static ArrayList<Double> feedForward(ArrayList<Double> givenInputs, NeuralNetwork neuralNetwork) {
-        ArrayList<Double> outputs = Level.feedForward(
+        ArrayList<Double> outputs;
+
+        outputs = Level.feedForward(
                 givenInputs,
                 neuralNetwork.getLevels().get(0)
         );
@@ -39,7 +41,7 @@ public class NeuralNetwork {
         for (int i = 1; i < neuralNetwork.getLevels().size(); i++) {
             outputs = Level.feedForward(
                     outputs,
-                    neuralNetwork.getLevels().get(0)
+                    neuralNetwork.getLevels().get(i)
             );
         }
 

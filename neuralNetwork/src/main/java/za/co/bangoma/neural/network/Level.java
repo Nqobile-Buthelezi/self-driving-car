@@ -25,7 +25,6 @@ public class Level {
 
         for (int i = 0; i < inputNeuronCount; i++) {
             this.weights.add(new ArrayList<Double>(outputNeuronCount));
-            // this.weights.get(i).add(i, new ArrayList<>(outputNeuronCount));
         }
 
         randomize(); // The American spelling really is terrible but standard
@@ -80,16 +79,21 @@ public class Level {
     }
 
     public static ArrayList<Double> feedForward(ArrayList<Double> givenInputs, Level level) {
-        for (int i = 0; i < level.inputs.size(); i++) {
+        // Clear out inputs and biases before adding more data
+        level.inputs.clear();
+        level.outputs.clear();
+
+
+        for (int i = 0; i < level.getInputCount(); i++) {
             level.inputs.add(i, givenInputs.get(i));
         }
 
-        for (int i = 0; i < level.outputs.size(); i++) {
+        for (int i = 0; i < level.getOutputCount(); i++) {
             double sum = 0;
 
-            for (int j = 0; j < level.inputs.size(); j++) {
+            for (int j = 0; j < level.getInputCount(); j++) {
                 ArrayList<Double> currentWeight = level.weights.get(j);
-                sum += level.inputs.get(i) * (double) currentWeight.get(i);
+                sum += level.inputs.get(j) * (double) currentWeight.get(i);
             }
 
             if (sum >= level.biases.get(i)) { // Switch the output neuron on

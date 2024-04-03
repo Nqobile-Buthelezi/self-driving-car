@@ -31,6 +31,10 @@ public class Car implements Vehicle, Drawable {
     private String controlType;
     private boolean damaged = false;
     private NeuralNetwork brain;
+    private boolean shouldMoveForward = false;
+    private boolean shouldMoveBackward = false;
+    private boolean shouldMoveLeft = false;
+    private boolean shouldMoveRight = false;
 
 
     public Car(int x, int y, int width, int height, Color color, int maxSpeed, String controlType, ArrayList<Point[]> roadBorders, Car[] traffic) {
@@ -47,6 +51,16 @@ public class Car implements Vehicle, Drawable {
 
         if (controlType.equals("CONTROL")) {
             this.controls = new Controls();
+            shouldMoveForward = this.controls.isForward();
+            shouldMoveBackward = this.controls.isBack();
+            shouldMoveLeft = this.controls.isLeft();
+            shouldMoveRight = this.controls.isRight();
+
+            this.sensor = new Sensor(this);
+            this.sensor.update(this.roadBorders, this.traffic);
+            // this.brain = new NeuralNetwork(new Integer[] {this.sensor.getRayCount(), 6, 4});
+        }   else if (controlType.equals(("AI"))) {
+
             this.sensor = new Sensor(this);
             this.sensor.update(this.roadBorders, this.traffic);
             this.brain = new NeuralNetwork(new Integer[] {this.sensor.getRayCount(), 6, 4});
@@ -80,6 +94,10 @@ public class Car implements Vehicle, Drawable {
 
     public int getHeight() {
         return height;
+    }
+
+    public NeuralNetwork getBrain() {
+        return brain;
     }
 
     // Method/s
@@ -146,10 +164,10 @@ public class Car implements Vehicle, Drawable {
             double angleChange = Math.atan(this.width / turningRadius);
 
             // Adjust angle based on controls
-            if (this.controls.isLeft()) {
+            if (shouldMoveLeft) {
                 this.angle += angleChange; // Turn left
             }
-            if (this.controls.isRight()) {
+            if (shouldMoveRight) {
                 this.angle -= angleChange; // Turn right
             }
 
@@ -171,16 +189,16 @@ public class Car implements Vehicle, Drawable {
         double deltaY = this.speed * Math.cos(angleInRadians);
         // Update the position
         this.x -= deltaX;
-        this.y += deltaY; // Note the positive increment in y due to AWT's coordinate sytem
+        this.y += deltaY; // Note the positive increment in y due to AWT's coordinate system
     }
 
 
     private void updateSpeed() {
         // If the upwards key is pressed accelerate or decelerate.
-        if (this.controls.isForward()) {
+        if (shouldMoveForward) {
             this.speed -= this.acceleration;
         }
-        if (this.controls.isBack()) {
+        if (shouldMoveBackward) {
             this.speed += this.acceleration;
         }
 
@@ -205,6 +223,68 @@ public class Car implements Vehicle, Drawable {
         // is not yet greater than the friction applied.
         if (Math.abs(this.speed) < this.friction) {
             this.speed = 0;
+        }
+    }
+
+    @Override
+    public void moveForward() {
+        this.y--;
+        this.polygon = createPolygon();
+    }
+
+    @Override
+    public void move() {
+        if (!this.damaged) {
+                updateSpeed();
+                updateAngle();
+                this.polygon = createPolygon();
+                updatePosition();
+                if (this.controlType.equals("CONTROL")) {
+                    this.sensor.update(this.roadBorders, this.traffic);
+                } else if (this.controlType.equals("AI")) {
+                    ArrayList<Double> outputs;
+                    this.sensor.update(this.roadBorders, this.traffic);
+                    ArrayList<Double> sensorOffsetArray = getInputReadings();
+
+                    outputs = NeuralNetwork.feedForward(sensorOffsetArray, this.brain);
+
+                    double threshold = 0.0; // Adjust this threshold as needed
+
+                    shouldMoveForward = outputs.get(0) > threshold;
+                    shouldMoveBackward = outputs.get(1) > threshold;
+                    shouldMoveLeft = outputs.get(2) > threshold;
+                    shouldMoveRight = outputs.get(3) > threshold; // Ensure you use the correct index
+
+                    outputs.clear();
+                }
+
+            this.damaged = assessDamage();
+        } else {
+            stop();
+        }
+    }
+
+    private ArrayList<Double> getInputReadings() {
+        ArrayList<Double> sensorOffsetArray = new ArrayList<>();
+
+        for (int i = 0; i < this.sensor.getOffsetReadings().size(); i++) {
+            try {
+                Hashtable<String, Double> reading = this.sensor.getOffsetReadings().get(i);
+                double sensorOffset = reading.get("offset");
+                sensorOffsetArray.add(sensorOffset);
+            } catch (NullPointerException e) {
+                sensorOffsetArray.add(0.0);
+            }
+        }
+        return sensorOffsetArray;
+    }
+
+    @Override
+    public void paint(Graphics2D g2d) {
+        if (damaged) {
+            paintDamagedCar(g2d);
+        } else {
+            paintCarAndSensor(g2d);
         }
     }
 
@@ -259,7 +339,7 @@ public class Car implements Vehicle, Drawable {
         g2d.setStroke(oldStroke);
 
         // Draw the sensor
-        if (this.controlType.equals("CONTROL")) {
+        if (this.controlType.equals("CONTROL") || this.controlType.equals("AI")) {
             this.sensor.draw(g2d);
         }
     }
@@ -278,45 +358,5 @@ public class Car implements Vehicle, Drawable {
         g2d.setTransform(originalTransform);
     }
 
-    @Override
-    public void moveForward() {
-        this.y--;
-        this.polygon = createPolygon();
-    }
-
-    @Override
-    public void move() {
-        if (!this.damaged) {
-                updateSpeed();
-                updateAngle();
-                this.polygon = createPolygon();
-                updatePosition();
-                if (this.controlType.equals("CONTROL")) {
-                    this.sensor.update(this.roadBorders, this.traffic);
-
-                    ArrayList<Double> sensorOffsetArray = new ArrayList<>();
-
-                    for (Hashtable<String, Double> reading: this.sensor.getOffsetReadings()) {
-                        double sensorOffset = reading.get("offset");
-                        sensorOffsetArray.add(sensorOffset);
-                    }
-
-                    ArrayList<Double> outputs = NeuralNetwork.feedForward(sensorOffsetArray, this.brain);
-                }
-
-            this.damaged = assessDamage();
-        } else {
-            stop();
-        }
-    }
-
-    @Override
-    public void paint(Graphics2D g2d) {
-        if (damaged) {
-            paintDamagedCar(g2d);
-        } else {
-            paintCarAndSensor(g2d);
-        }
-    }
 
 }

@@ -1,10 +1,14 @@
 package za.co.bangoma.neural.network;
 
 import za.co.bangoma.neural.Utils;
+import za.co.bangoma.neural.road.RoadCanvas;
+import za.co.bangoma.neural.road.car.Car;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class NetworkCanvas extends Canvas {
@@ -14,21 +18,36 @@ public class NetworkCanvas extends Canvas {
     private static final int NETWORK_X = 360;
     private static final int NETWORK_Y = 0;
     private final int MARGIN = 50;
+    private final int TIMER_DELAY_IN_MILLISECONDS = 1000 / 60; // Running at 60fps basically
 
     // Attributes
     private final int height;
     private BufferedImage offScreenImage;
+    private RoadCanvas roadCanvas;
+    private Timer timer;
+    private NeuralNetwork brain;
 
     // Constructor
-    public NetworkCanvas(int canvasHeight) {
+    public NetworkCanvas(int canvasHeight, RoadCanvas roadCanvas) {
         this.height = canvasHeight;
+        this.roadCanvas = roadCanvas;
 
         // Creating and defining our canvas for our screen
         setBackground(Color.BLACK);
         setBounds(NETWORK_X, NETWORK_Y, WIDTH, canvasHeight);
 
-        // Initialize the off-screen image
+        // Initialise the off-screen image
         offScreenImage = new BufferedImage(WIDTH, canvasHeight, BufferedImage.TYPE_INT_ARGB);
+
+        // Start a timer to trigger repaints at regular intervals
+        this.timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                updateBrainData(); // Update the brain data before each repaint
+                repaint();
+            }
+        }, 0, TIMER_DELAY_IN_MILLISECONDS); // Repaint approximately 60 times per second
     }
 
     // Getter/s
@@ -38,64 +57,102 @@ public class NetworkCanvas extends Canvas {
     }
 
     // Methods
+    private void updateBrainData() {
+        // Get the neural network data from the roadCanvas
+        brain = roadCanvas.getMyCar().getBrain();
+    }
+
     @Override
     public void paint(Graphics g) {
         super.paint(g);
+        Graphics2D g2d = (Graphics2D) g;
 
-        // Create off-screen graphics context
-        Graphics2D offScreenGraphics = offScreenImage.createGraphics();
-
-        offScreenGraphics.setColor(Color.BLUE);
-        offScreenGraphics.fillOval(25, 50, 50, 50);
-
-        // Paint everything onto the off-screen image
-        paintNetWorkComponents(offScreenGraphics);
-
-        // Draw the off-screen image onto the canvas
-        g.drawImage(offScreenImage, 0, 0, null);
-
-        // Dispose the off-screen graphics context
-        offScreenGraphics.dispose();
-
+        // Paint your neural network using data from the brain
+        paintNetworkComponents(g2d, brain);
     }
 
-    private void paintNetWorkComponents(Graphics2D graphics2D) {
+    private static boolean isNetworkValid(NeuralNetwork brain) {
+        ArrayList<Boolean> levelsExist = new ArrayList<>();
 
+        for (Level level : brain.getLevels()) {
+            // If our level has inputs "feeding" outputs,
+            // along with relevant weights and biases it is possible to visualise.
+            if (!level.getInputs().isEmpty() && !level.getOutputs().isEmpty()) {
+                if (
+                        level.getInputs().size() != 5 || // if not equal to our sensor array
+                        level.getInputs().size() != 6 && // If not equal to second level's inputs
+                        level.getOutputs().size() != 6 || // If first level outputs not equal to second level
+                        level.getOutputs().size() != 4 // If second level outputs don't match our output commands length
+                ) {
+                    levelsExist.add(false); // Return false if sizes don't match
+                } else {
+                    levelsExist.add(true);
+                }
+            } else {
+                levelsExist.add(false);
+            }
+        }
+
+        boolean networkValid = !levelsExist.contains(false) && !levelsExist.isEmpty();
+        return networkValid;
+    }
+
+    private void paintNetworkComponents(Graphics2D graphics2D, NeuralNetwork network) {
+        boolean networkValid = isNetworkValid(brain);
+        if (networkValid) {
+            System.out.println("You've got it!");
+            for (Level level: network.getLevels()) {
+                System.out.println("My first input is: " + level.getInputs().get(0));
+                System.out.println("My first output is: " + level.getOutputs().get(0));
+                System.out.println("My first bias is: " + level.getBiases().get(0));
+                System.out.println("My first weight is: " + level.getWeights().get(0).get(0));
+            }
+        }
+        
         int left = MARGIN;
         int top = MARGIN;
 
         int width = WIDTH - MARGIN * 2;
         int height = this.height - MARGIN * 2;
 
-        int levelHeight = height / NeuralNetwork.getLevels().size();
+        int levelHeight = height / network.getLevels().size();
 
-        for (int i = NeuralNetwork.getLevels().size() - 1; i >= 0; i--) {
+        for (int i = network.getLevels().size() - 1; i >= 0; i--) {
 
             double levelTop = top + Utils.linearInterpolation(
                     height - levelHeight,
                     0,
-                    NeuralNetwork.getLevels().size() == 1 ? 0.5 : (double) i / (NeuralNetwork.getLevels().size() - 1)
+                    network.getLevels().size() == 1 ? 0.5 : (double) i / (network.getLevels().size() - 1)
             );
 
-            drawLevel(
-                    graphics2D,
-                    NeuralNetwork.getLevels().get(i),
-                    left,
-                    levelTop,
-                    width,
-                    levelHeight,
-                    i == NeuralNetwork.getLevels().size() - 1 ? new String[] {"⬆", "⬅", "➡", "⬇"} : new String[] {}
-            );
+            if (i == 0) { // TEMPORARY DEBUGGING PURPOSES
+                drawLevel(
+                        graphics2D,
+                        network.getLevels().get(i),
+                        left,
+                        levelTop,
+                        width,
+                        levelHeight,
+                        i == network.getLevels().size() - 1 ? new String[]{"⬆", "⬅", "➡", "⬇"} : new String[]{}
+                );
+            } else { // TEMPORARY DEBUGGING PURPOSES
+                drawLevel(
+                        graphics2D,
+                        network.getLevels().get(i),
+                        left,
+                        levelTop,
+                        width,
+                        levelHeight,
+                        i == network.getLevels().size() - 1 ? new String[]{"⬆", "⬅", "➡", "⬇"} : new String[]{}
+                );
+            }
+
         }
     }
 
-    // Methods
     private void drawLevel(Graphics2D graphics, Level level, int left, double top, int width, int height, String[] strings) {
         int right = left + width;
         int bottom = (int) (top + height);
-
-        graphics.setColor(Color.RED);
-        graphics.fillOval(75, 50, 50, 50);
 
         ArrayList<Double> inputs = level.getInputs();
         ArrayList<Double> outputs = level.getOutputs();
@@ -103,44 +160,53 @@ public class NetworkCanvas extends Canvas {
         // Value of our "neuron's 'axons'"
         ArrayList<ArrayList<Double>> weights = level.getWeights();
 
-        int nodeRadius = 18; // ALso known as the "neuronal soma" radius,
+        int nodeRadius = 30; // ALso known as the "neuronal soma" radius,
         // (that's just my understanding, not common practice)
 
-        for (int i = 0; i < level.getInputCount(); i++) {
-            for (int j = 0; j < level.getOutputCount(); j++) {
+        if (!inputs.isEmpty() && !outputs.isEmpty()) {
+            for (int i = 0; i < level.getInputCount(); i++) {
+                for (int j = 0; j < level.getOutputCount(); j++) {
 
-                graphics.setColor(Utils.getRGBA(weights.get(i).get(j)));
+                    graphics.setColor(Utils.getRGBA(weights.get(i).get(j)));
 
-                drawDashedLine(
-                    graphics,
-                        (int) getNodeX(inputs, i, left, right),
-                        bottom,
-                        (int) getNodeX(outputs, j, left, right),
-                        (int) top
-                );
+                    int inputX = (int) getNodeX(inputs, i, left, right);
+                    int outputX = (int) getNodeX(outputs, j, left, right);
+
+                    drawDashedLine(
+                            graphics,
+                            inputX,
+                            bottom,
+                            outputX,
+                            (int) top
+                    );
+                }
             }
-        }
 
-        for (int i = 0; i < level.getInputCount(); i++) {
-            double x = getNodeX(inputs, i, left, right);
+            for (int i = 0; i < level.getInputCount(); i++) {
+                double x = getNodeX(inputs, i, left, right);
 
-            graphics.setColor(Color.BLACK);
-            graphics.fillOval((int) x, bottom, nodeRadius, nodeRadius);
+                graphics.setColor(Color.BLACK);
+                graphics.fillOval((int) x - (nodeRadius / 3), bottom - (nodeRadius / 3), nodeRadius, nodeRadius);
 
-            graphics.setColor(Utils.getRGBA(inputs.get(i)));
-            graphics.fillOval((int) x, bottom, (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
-        }
+                if (inputs.size() > 1 && inputs.size() > i) {
+                    graphics.setColor(Utils.getRGBA(inputs.get(i)));
+                }
+                graphics.fillOval((int) x - (nodeRadius / 3), bottom - (nodeRadius / 3), (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
+            }
 
-        for (int i = 0; i < level.getOutputCount(); i++) {
-            double x = getNodeX(outputs, i, left, right);
+            for (int i = 0; i < level.getOutputCount(); i++) {
+                double x = getNodeX(outputs, i, left, right);
 
-            graphics.setColor(Color.BLACK);
-            graphics.fillOval((int) x, (int) top, nodeRadius, nodeRadius);
+                graphics.setColor(Color.BLACK);
+                graphics.fillOval((int) x - (nodeRadius / 3), (int) top - (nodeRadius / 3), nodeRadius, nodeRadius);
 
-            graphics.setColor(Utils.getRGBA(outputs.get(i)));
-            graphics.fillOval((int) x, (int) top, (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
+                if (outputs.size() > 1 && outputs.size() > i) {
+                    graphics.setColor(Utils.getRGBA(outputs.get(i)));
+                }
+                graphics.fillOval((int) x - (nodeRadius / 3), (int) top - (nodeRadius / 3), (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
 
-            // Biases drawn as a contour around the output.
+                // Biases drawn as a contour around the output.
+            }
         }
     }
 

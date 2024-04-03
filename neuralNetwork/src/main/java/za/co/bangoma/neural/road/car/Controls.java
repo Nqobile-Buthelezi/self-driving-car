@@ -23,6 +23,22 @@ public class Controls {
         return right;
     }
 
+    public void setForward(boolean forward) {
+        this.forward = forward;
+    }
+
+    public void setBack(boolean back) {
+        this.back = back;
+    }
+
+    public void setLeft(boolean left) {
+        this.left = left;
+    }
+
+    public void setRight(boolean right) {
+        this.right = right;
+    }
+
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
 

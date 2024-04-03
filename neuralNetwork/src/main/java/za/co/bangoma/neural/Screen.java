@@ -2,6 +2,7 @@ package za.co.bangoma.neural;
 
 // Importing Java AWT to start
 import za.co.bangoma.neural.network.NetworkCanvas;
+import za.co.bangoma.neural.network.NeuralNetwork;
 import za.co.bangoma.neural.road.RoadCanvas;
 
 import java.awt.*; // Abstract Window Toolkit
@@ -40,7 +41,7 @@ public class Screen extends Frame {
         roadCanvas = new RoadCanvas(HEIGHT, 3);
         add(roadCanvas);
 
-        networkCanvas = new NetworkCanvas(HEIGHT);
+        networkCanvas = new NetworkCanvas(HEIGHT, roadCanvas);
         add(networkCanvas);
 
         // Set the width and height of our Frame/Screen
