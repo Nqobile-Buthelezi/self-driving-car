@@ -8,6 +8,7 @@ public class NeuralNetwork {
 
     // Attributes
     private ArrayList<Level> levels;
+    private static ArrayList<Double> outputs;
 
     // Constructor
     public NeuralNetwork(Integer[] neuronCounts) {
@@ -18,6 +19,14 @@ public class NeuralNetwork {
     // Getter/s
     public ArrayList<Level> getLevels() {
         return levels;
+    }
+
+    public ArrayList<Double> getOutputs() {
+        return this.outputs;
+    }
+
+    public void setOutputs(ArrayList<Double> outputs) {
+        this.outputs = outputs;
     }
 
     // Method/s
@@ -31,21 +40,23 @@ public class NeuralNetwork {
     }
 
     public static ArrayList<Double> feedForward(ArrayList<Double> givenInputs, NeuralNetwork neuralNetwork) {
-        ArrayList<Double> outputs;
+        ArrayList<Double> networkOutputs;
 
-        outputs = Level.feedForward(
+        networkOutputs = Level.feedForward(
                 givenInputs,
                 neuralNetwork.getLevels().get(0)
         );
 
         for (int i = 1; i < neuralNetwork.getLevels().size(); i++) {
-            outputs = Level.feedForward(
-                    outputs,
+            networkOutputs = Level.feedForward(
+                    networkOutputs,
                     neuralNetwork.getLevels().get(i)
             );
         }
 
-        return outputs;
+        neuralNetwork.setOutputs(networkOutputs);
+
+        return networkOutputs;
     }
 
     private static void mutate(NeuralNetwork neuralNetwork, int amount) {

@@ -39,6 +39,10 @@ public class Level {
         return outputs;
     }
 
+    public void setOutputs(ArrayList<Double> outputs) {
+        this.outputs = outputs;
+    }
+
     public ArrayList<Double> getBiases() {
         return biases;
     }
@@ -79,32 +83,34 @@ public class Level {
     }
 
     public static ArrayList<Double> feedForward(ArrayList<Double> givenInputs, Level level) {
-        // Clear out inputs and biases before adding more data
+        // Clear out inputs and outputs before adding more data
         level.inputs.clear();
         level.outputs.clear();
 
-
-        for (int i = 0; i < level.getInputCount(); i++) {
-            level.inputs.add(i, givenInputs.get(i));
+        // Copy the given inputs to the inputs array
+        for (double input : givenInputs) {
+            level.inputs.add(input);
         }
 
+        // Calculate outputs based on inputs, weights, and biases
         for (int i = 0; i < level.getOutputCount(); i++) {
             double sum = 0;
 
             for (int j = 0; j < level.getInputCount(); j++) {
                 ArrayList<Double> currentWeight = level.weights.get(j);
-                sum += level.inputs.get(j) * (double) currentWeight.get(i);
+                sum += level.inputs.get(j) * currentWeight.get(i);
             }
 
             if (sum >= level.biases.get(i)) { // Switch the output neuron on
-                level.outputs.add(i, 1.0);
+                level.outputs.add(1.0);
             } else {
                 // Switch the output neuron off as the product of the input
                 // and weight wasn't enough to trigger it
-                level.outputs.add(i, 0.0);
+                level.outputs.add(0.0);
             }
         }
 
         return level.outputs;
     }
+
 }

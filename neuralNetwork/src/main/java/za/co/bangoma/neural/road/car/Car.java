@@ -60,10 +60,9 @@ public class Car implements Vehicle, Drawable {
             this.sensor.update(this.roadBorders, this.traffic);
             // this.brain = new NeuralNetwork(new Integer[] {this.sensor.getRayCount(), 6, 4});
         }   else if (controlType.equals(("AI"))) {
-
-            this.sensor = new Sensor(this);
+            this.sensor = new Sensor(this); // Initialise this first
+            this.brain = new NeuralNetwork(new Integer[] {this.sensor.getRayCount(), 6, 4}); // Initialise the brain second
             this.sensor.update(this.roadBorders, this.traffic);
-            this.brain = new NeuralNetwork(new Integer[] {this.sensor.getRayCount(), 6, 4});
         }
     }
 
@@ -98,6 +97,22 @@ public class Car implements Vehicle, Drawable {
 
     public NeuralNetwork getBrain() {
         return brain;
+    }
+
+    public boolean isShouldMoveForward() {
+        return shouldMoveForward;
+    }
+
+    public boolean isShouldMoveBackward() {
+        return shouldMoveBackward;
+    }
+
+    public boolean isShouldMoveLeft() {
+        return shouldMoveLeft;
+    }
+
+    public boolean isShouldMoveRight() {
+        return shouldMoveRight;
     }
 
     // Method/s
@@ -250,10 +265,15 @@ public class Car implements Vehicle, Drawable {
 
                     double threshold = 0.0; // Adjust this threshold as needed
 
-                    shouldMoveForward = outputs.get(0) > threshold;
-                    shouldMoveBackward = outputs.get(1) > threshold;
-                    shouldMoveLeft = outputs.get(2) > threshold;
-                    shouldMoveRight = outputs.get(3) > threshold; // Ensure you use the correct index
+//                    shouldMoveForward = outputs.get(0) > threshold;
+//                    shouldMoveBackward = outputs.get(1) > threshold;
+//                    shouldMoveLeft = outputs.get(2) > threshold;
+//                    shouldMoveRight = outputs.get(3) > threshold; // Ensure you use the correct index
+
+                    shouldMoveForward = this.brain.getOutputs().get(0) > threshold;
+                    shouldMoveBackward = this.brain.getOutputs().get(1) > threshold;
+                    shouldMoveLeft = this.brain.getOutputs().get(2) > threshold;
+                    shouldMoveRight = this.brain.getOutputs().get(3) > threshold; // Ensure you use the correct index
 
                     outputs.clear();
                 }

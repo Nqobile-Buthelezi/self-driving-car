@@ -11,12 +11,17 @@ public class Utils {
     }
 
     public static Color getRGBA(Double value) {
-        int alpha = (int) Math.abs(value * 255);
-        int R = value < 0 ? 0 : 255;
-        int G = R;
-        int B = value > 0 ? 0 : 255;
+        if (value != null) {
+            int alpha = (int) Math.abs(value * 255);
+            int R = value < 0 ? 0 : 255;
+            int G = R;
+            int B = value > 0 ? 0 : 255;
 
-        return new Color(R, G, B, alpha);
+            return new Color(R, G, B, alpha);
+        } else {
+            // Handles the case when value is null
+            return Color.BLACK; // For example, I will return black if value is null
+        }
     }
 
     public static Hashtable<String, Double> getIntersection(Point A, Point B, Point C, Point D) {
