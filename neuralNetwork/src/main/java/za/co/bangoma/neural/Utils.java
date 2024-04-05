@@ -20,7 +20,7 @@ public class Utils {
             return new Color(R, G, B, alpha);
         } else {
             // Handles the case when value is null
-            return Color.BLACK; // For example, I will return black if value is null
+            return Color.DARK_GRAY; // For example, I will return black if value is null
         }
     }
 

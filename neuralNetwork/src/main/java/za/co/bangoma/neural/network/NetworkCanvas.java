@@ -36,7 +36,7 @@ public class NetworkCanvas extends Canvas {
         this.myCar = roadCanvas.getMyCar();
 
         // Creating and defining our canvas for our screen
-        setBackground(Color.BLACK);
+        setBackground(Color.DARK_GRAY);
         setBounds(NETWORK_X, NETWORK_Y, WIDTH, canvasHeight);
 
         // Initialise the off-screen image
@@ -171,24 +171,24 @@ public class NetworkCanvas extends Canvas {
                     double x = getNodeX(inputs, i, left, right);
 
                     graphics.setColor(Color.BLACK);
-                    graphics.fillOval((int) x - (nodeRadius / 3), bottom - (nodeRadius / 3), nodeRadius, nodeRadius);
+                    graphics.fillOval((int) x - (nodeRadius / 2), bottom - (nodeRadius / 2), nodeRadius, nodeRadius);
 
                     if (inputs.size() > 1 && inputs.size() > i) {
                         graphics.setColor(Utils.getRGBA(inputs.get(i)));
                     }
-                    graphics.fillOval((int) x - (nodeRadius / 3), bottom - (nodeRadius / 3), (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
+                    graphics.fillOval((int) x - (nodeRadius / 2) + 6, bottom - (nodeRadius / 2) + 6, (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
                 }
 
                 for (int i = 0; i < level.getOutputCount(); i++) {
                     double x = getNodeX(finalOutputs, i, left, right);
 
                     graphics.setColor(Color.BLACK);
-                    graphics.fillOval((int) x - (nodeRadius / 3), (int) top - (nodeRadius / 3), nodeRadius, nodeRadius);
+                    graphics.fillOval((int) x - (nodeRadius / 2), (int) top - (nodeRadius / 2), nodeRadius, nodeRadius);
 
                     if (finalOutputs.size() > 1 && finalOutputs.size() > i) {
                         graphics.setColor(Utils.getRGBA(finalOutputs.get(i)));
                     }
-                    graphics.fillOval((int) x - (nodeRadius / 3), (int) top - (nodeRadius / 3), (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
+                    graphics.fillOval((int) x - (nodeRadius / 2) + 6, (int) top - (nodeRadius / 2) + 6, (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
 
                     if (i < strings.length) {
                         graphics.setColor(Color.WHITE);
@@ -205,7 +205,9 @@ public class NetworkCanvas extends Canvas {
                         );
                         graphics.setFont(originalFont); // Restore the original font
                     }
+
                     // Biases drawn as a contour around the output.
+
                 }
             }
         } else {
@@ -235,24 +237,24 @@ public class NetworkCanvas extends Canvas {
                     double x = getNodeX(inputs, i, left, right);
 
                     graphics.setColor(Color.BLACK);
-                    graphics.fillOval((int) x - (nodeRadius / 3), bottom - (nodeRadius / 3), nodeRadius, nodeRadius);
+                    graphics.fillOval((int) x - (nodeRadius / 2), bottom - (nodeRadius / 2), nodeRadius, nodeRadius);
 
                     if (inputs.size() > 1 && inputs.size() > i) {
                         graphics.setColor(Utils.getRGBA(inputs.get(i)));
                     }
-                    graphics.fillOval((int) x - (nodeRadius / 3), bottom - (nodeRadius / 3), (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
+                    graphics.fillOval((int) x - (nodeRadius / 2) + 6, bottom - (nodeRadius / 2) + 6, (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
                 }
 
                 for (int i = 0; i < level.getOutputCount(); i++) {
                     double x = getNodeX(outputs, i, left, right);
 
                     graphics.setColor(Color.BLACK);
-                    graphics.fillOval((int) x - (nodeRadius / 3), (int) top - (nodeRadius / 3), nodeRadius, nodeRadius);
+                    graphics.fillOval((int) x - (nodeRadius / 2), (int) top - (nodeRadius / 2), nodeRadius, nodeRadius);
 
                     if (outputs.size() > 1 && outputs.size() > i) {
                         graphics.setColor(Utils.getRGBA(outputs.get(i)));
                     }
-                    graphics.fillOval((int) x - (nodeRadius / 3), (int) top - (nodeRadius / 3), (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
+                    graphics.fillOval((int) x - (nodeRadius / 2) + 6, (int) top - (nodeRadius / 2) + 6, (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
 
                     // Biases drawn as a contour around the output.
                 }

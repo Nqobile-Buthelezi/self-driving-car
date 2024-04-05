@@ -1,13 +1,13 @@
 package za.co.bangoma.neural;
 
-// Importing Java AWT to start
-import za.co.bangoma.neural.network.NetworkCanvas;
-import za.co.bangoma.neural.network.NeuralNetwork;
-import za.co.bangoma.neural.road.RoadCanvas;
 
-import java.awt.*; // Abstract Window Toolkit
+// Importing Java AWT to start
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import za.co.bangoma.neural.network.NetworkCanvas;
+import za.co.bangoma.neural.road.RoadCanvas;
 
 
 public class Screen extends Frame {
@@ -18,9 +18,22 @@ public class Screen extends Frame {
     final int HEIGHT = 720;
 
 
-    // Constructor
+    // Constructor/s
     public Screen() {
+        initialiseComponents();
+    }
 
+    public Screen(boolean testEnvironment) {
+        if (testEnvironment) {
+            roadCanvas = null;
+            networkCanvas = null;
+        } else {
+            initialiseComponents();
+        }
+    }
+
+    // Method/s
+    public void initialiseComponents() {
         // Creating a button
         Button actionButton = new Button("Start");
 
@@ -55,7 +68,6 @@ public class Screen extends Frame {
 
         // Let us manually set the visibility of our screen, the default is off
         setVisible(true);
-
     }
 
     @Override
