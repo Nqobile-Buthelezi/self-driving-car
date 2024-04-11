@@ -61,8 +61,8 @@ public class NetworkCanvas extends Canvas {
 
     // Methods
     private void updateBrainData() {
-        // Get the neural network data from the roadCanvas
-        brain = roadCanvas.getMyCar().getBrain();
+        // Get the neural network data from the best car
+        brain = roadCanvas.getBestCar().getBrain();
     }
 
     @Override
@@ -140,10 +140,10 @@ public class NetworkCanvas extends Canvas {
 
         if (outputs.isEmpty()) {
             ArrayList<Double> finalOutputs = new ArrayList<>();
-            finalOutputs.add(this.roadCanvas.getMyCar().isShouldMoveForward() ? 1.0 : 0.0);
-            finalOutputs.add(this.roadCanvas.getMyCar().isShouldMoveBackward() ? 1.0 : 0.0);
-            finalOutputs.add(this.roadCanvas.getMyCar().isShouldMoveLeft() ? 1.0 : 0.0);
-            finalOutputs.add(this.roadCanvas.getMyCar().isShouldMoveRight() ? 1.0 : 0.0);
+            finalOutputs.add(this.roadCanvas.getBestCar().isShouldMoveForward() ? 1.0 : 0.0);
+            finalOutputs.add(this.roadCanvas.getBestCar().isShouldMoveBackward() ? 1.0 : 0.0);
+            finalOutputs.add(this.roadCanvas.getBestCar().isShouldMoveLeft() ? 1.0 : 0.0);
+            finalOutputs.add(this.roadCanvas.getBestCar().isShouldMoveRight() ? 1.0 : 0.0);
 
             int nodeRadius = 30; // ALso known as the "neuronal soma" radius,
             // (that's just my understanding, not common practice)

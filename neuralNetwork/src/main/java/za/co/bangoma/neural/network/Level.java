@@ -113,4 +113,22 @@ public class Level {
         return level.outputs;
     }
 
+    public Level copy() {
+        Level copy = new Level(this.inputCount, this.outputCount); // Create a new Level object with the same dimensions
+
+        // Copy inputs, outputs, biases, and weights
+        copy.inputs = new ArrayList<>(this.inputs);
+        copy.outputs = new ArrayList<>(this.outputs);
+        copy.biases = new ArrayList<>(this.biases);
+
+        // Deep copy weights
+        copy.weights = new ArrayList<>();
+        for (ArrayList<Double> weightList : this.weights) {
+            copy.weights.add(new ArrayList<>(weightList));
+        }
+
+        return copy;
+    }
+
+
 }

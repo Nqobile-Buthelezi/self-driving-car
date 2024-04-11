@@ -1,5 +1,8 @@
 package za.co.bangoma.neural.road;
 
+import com.google.gson.GsonBuilder;
+import za.co.bangoma.neural.Utils;
+import za.co.bangoma.neural.network.NeuralNetwork;
 import za.co.bangoma.neural.road.car.Car;
 import za.co.bangoma.neural.road.car.Drawable;
 import za.co.bangoma.neural.road.car.Sensor;
@@ -8,10 +11,16 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.google.gson.Gson;
 
 
 public class RoadCanvas extends Canvas implements KeyListener {
@@ -22,12 +31,17 @@ public class RoadCanvas extends Canvas implements KeyListener {
     private static final int TIMER_DELAY_IN_MILLISECONDS = 1000 / 72;
     private static final int ROAD_X = 110;
     private static final int ROAD_Y = 0;
+    private final String BEST_BRAIN_FILE = "best_brain.json";
     int ROAD_TOP = -100000;
     int ROAD_BOTTOM = 100000;
+    int N = 100;
 
     private Timer timer;
     private Car myCar;
     private Car[] traffic;
+    private Car[] cars;
+    private Car bestCar;
+    private NeuralNetwork bestBrain;
     private int laneCount;
     private int left;
 
@@ -39,9 +53,6 @@ public class RoadCanvas extends Canvas implements KeyListener {
     // onto the canvas to be utilised many times per second for the animation
     private BufferedImage offScreenImage;
 
-    public Car getMyCar() {
-        return myCar;
-    }
 
     public RoadCanvas(int canvasSize, int laneCount) {
         setBackground(Color.BLACK);
@@ -52,25 +63,44 @@ public class RoadCanvas extends Canvas implements KeyListener {
         this.laneCount = laneCount;
 
         this.left = (int) ((WIDTH - WIDTH * 0.9) / 2);
-        int right = (int) (WIDTH * 0.9 + (WIDTH * 0.1 / 2));
 
         // Calculate road borders
         calculateRoadBorders();
 
+        // get the best brain if it exists
+        initialiseBestBrain();
+
         traffic = new Car[] {
                 new Car(getLaneCentre(0), starting_y, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
-                new Car(getLaneCentre(2), starting_y, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
-                new Car(getLaneCentre(1), starting_y - 80, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{})
+                new Car(getLaneCentre(2), starting_y - 60, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(1), starting_y - 180, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(0), starting_y - 330, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(1), starting_y - 370, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(2), starting_y - 200, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{})
         };
 
-        // Adding our car object. Drawn from the top left corner
-        myCar = new Car(getLaneCentre(1), starting_y, 30, 50, Color.BLUE, 3, "AI", roadBorders, traffic);
+        cars = generateCars(N, starting_y);
 
+        bestCar = cars[0];
+
+        // Mutate cars' brains except for the best car
+        if (bestBrain != null) {
+            for (int i = 0; i < cars.length; i++) {
+                if (i == 0) {
+                    cars[i].setBrain(bestBrain.copy());
+                } else if (i != 0) {
+                    // Create a new instance of the best brain and mutate it
+                    NeuralNetwork mutatedBrain = NeuralNetwork.mutate(bestBrain.copy(), 0.1987); // Use .copy() to create a unique copy of the bestBrain
+                    cars[i].setBrain(mutatedBrain);
+                }
+            }
+        }
 
         this.drawables = new ArrayList<>();
 
         this.drawables.addAll(Arrays.asList(traffic));
-        this.drawables.add(myCar);
+        this.drawables.addAll(Arrays.asList(cars));
+        this.drawables.add(bestCar);
 
         // Adding keyboard listeners to the canvas, while implementing KeyListener
         addKeyListener(this);
@@ -79,7 +109,24 @@ public class RoadCanvas extends Canvas implements KeyListener {
         offScreenImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
     }
 
-     void calculateRoadBorders() {
+    private Car[] generateCars(int n, int starting_y) {
+        ArrayList<Car> cars = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            Car newCar = new Car(getLaneCentre(1), starting_y, 30, 50, Color.BLUE, 3, "AI", roadBorders, traffic);
+            Sensor newSensor = newCar.getSensor();
+            int rayCount = newSensor.getRayCount();
+            NeuralNetwork newNetwork = new NeuralNetwork(new Integer[] {rayCount, 6, 4});
+            newCar.setBrain(newNetwork);
+            cars.add(newCar);
+        }
+
+        Car[] finalCars = cars.toArray(new Car[n]);
+
+        return finalCars;
+    }
+
+    void calculateRoadBorders() {
         int top = ROAD_TOP;
         int bottom = ROAD_BOTTOM;
         int left = (int) (WIDTH * 0.05);
@@ -102,7 +149,6 @@ public class RoadCanvas extends Canvas implements KeyListener {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-
         // Create off-screen graphics context
         Graphics2D offScreenGraphics = offScreenImage.createGraphics();
 
@@ -125,7 +171,11 @@ public class RoadCanvas extends Canvas implements KeyListener {
                 repaint();
                 setFocusable(true); // Ensure the canvas can receive keyboard focus
 
-                myCar.move();
+                for (Car car : cars) {
+                    car.move();
+                }
+
+                bestCar = findBestCar();
 
                 for (Car vehicle: traffic) {
                     int y = vehicle.getY();
@@ -142,7 +192,7 @@ public class RoadCanvas extends Canvas implements KeyListener {
 
     private void paintComponents(Graphics2D g2d) {
         // Calculate the translation to center the car vertically on the screen
-        int carYTranslation = getHeight() / 2 - myCar.getY();
+        int carYTranslation = getHeight() / 2 - bestCar.getY();
 
         // Translate the graphics context to center the car vertically
         g2d.translate(0, carYTranslation);
@@ -168,17 +218,24 @@ public class RoadCanvas extends Canvas implements KeyListener {
             drawDashedLine(g2d, laneWidth + left + laneWidth * i, ROAD_TOP, laneWidth + left + laneWidth * i, ROAD_BOTTOM - ROAD_TOP);
         }
 
-        // Paint all cars first
+        // Paint all cars with 20% opacity
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.2f));
         for (Drawable drawable : this.drawables) {
             if (drawable instanceof Car) {
-                drawable.paint(g2d);
+                Car car = (Car) drawable;
+                g2d.setColor(Utils.getRGBA(0.2)); // Set color with 20% opacity
+                car.paint(g2d);
             }
         }
 
-        // Paint all sensors next
+        // Paint sensor array only for the bestCar
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f)); // Reset opacity
         for (Drawable drawable : this.drawables) {
-            if (drawable instanceof Sensor) {
-                drawable.paint(g2d);
+            if (drawable instanceof Car && drawable == bestCar) {
+                Car car = (Car) drawable;
+                if (car == bestCar) {
+                    car.getSensor().draw(g2d);
+                }
             }
         }
 
@@ -196,6 +253,10 @@ public class RoadCanvas extends Canvas implements KeyListener {
         // Returns the centre on the lane selected counting from the left side
         // Ensures that if the laneIndex provided exceeds the lane's the last lane is chosen.
         return this.left + laneWidth / 2 + Math.min(laneIndex, this.laneCount - 1) * laneWidth;
+    }
+
+    public Car getMyCar() {
+        return bestCar;
     }
 
     public void drawDashedLine(Graphics g, int x1, int y1, int x2, int y2) {
@@ -218,15 +279,68 @@ public class RoadCanvas extends Canvas implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (myCar.getControls() != null) {
-            myCar.getControls().keyPressed(e);
+        if (bestCar.getControls() != null) {
+            bestCar.getControls().keyPressed(e);
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (myCar.getControls() != null) {
-            myCar.getControls().keyReleased(e);
+        if (bestCar.getControls() != null) {
+            bestCar.getControls().keyReleased(e);
         }
+    }
+
+    private Car findBestCar() {
+        Car bestCar = cars[0]; // Assume the first car is the best initially
+
+        for (int i = 1; i < cars.length; i++) {
+            if (cars[i].getY() < bestCar.getY()) {
+                bestCar = cars[i];
+            }
+        }
+
+        return bestCar;
+    }
+
+    public void saveBestBrain() {
+        Gson gson = new Gson();
+        String bestBrainData = gson.toJson(bestCar.getBrain());
+
+        try (FileWriter writer = new FileWriter(BEST_BRAIN_FILE)) {
+            writer.write(bestBrainData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void discardBestBrain() {
+        File file = new File(BEST_BRAIN_FILE);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    // Add a method to load the best brain from file
+    private void loadBestBrain() {
+        Gson gson = new Gson();
+        try (FileReader reader = new FileReader(BEST_BRAIN_FILE)) {
+            NeuralNetwork bestBrain = gson.fromJson(reader, NeuralNetwork.class);
+            this.bestBrain = bestBrain;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Add this method to be called at initialization to load the best brain if available
+    private void initialiseBestBrain() {
+        File file = new File(BEST_BRAIN_FILE);
+        if (file.exists()) {
+            loadBestBrain();
+        }
+    }
+
+    public Car getBestCar() {
+        return bestCar;
     }
 }

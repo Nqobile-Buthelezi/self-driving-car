@@ -36,9 +36,13 @@ public class Screen extends Frame {
     public void initialiseComponents() {
         // Creating a button
         Button actionButton = new Button("Start");
+        Button saveButton = new Button("save");
+        Button discardButton = new Button("discard");
 
         // Setting my actionButton's position on screen, It's drawn from the bottom left.
         actionButton.setBounds(15, 45, 80, 30); // x pos, y pos, width and height in pixels.
+        saveButton.setBounds(15, 80, 80, 30);
+        discardButton.setBounds(15, 115, 80, 30);
 
         actionButton.addActionListener(new ActionListener() {
             @Override
@@ -47,8 +51,24 @@ public class Screen extends Frame {
             }
         });
 
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                roadCanvas.saveBestBrain();
+            }
+        });
+
+        discardButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                roadCanvas.discardBestBrain();
+            }
+        });
+
         // We need to manually add the button to our frame.
         add(actionButton);
+        add(saveButton);
+        add(discardButton);
 
         // Adding RoadCanvas
         roadCanvas = new RoadCanvas(HEIGHT, 3);

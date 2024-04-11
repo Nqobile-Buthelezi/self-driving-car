@@ -59,7 +59,7 @@ public class NeuralNetwork {
         return networkOutputs;
     }
 
-    private static void mutate(NeuralNetwork neuralNetwork, int amount) {
+    public static NeuralNetwork mutate(NeuralNetwork neuralNetwork, double amount) {
         ArrayList<Level> currentLevels = neuralNetwork.getLevels();
 
         for (Level level: currentLevels) {
@@ -87,5 +87,22 @@ public class NeuralNetwork {
                 }
             }
         }
+
+        return neuralNetwork;
     }
+
+    // Add a method to create a copy of the neural network
+    public NeuralNetwork copy() {
+        NeuralNetwork copy = new NeuralNetwork(new Integer[0]); // Empty constructor call
+        ArrayList<Level> copiedLevels = new ArrayList<>();
+
+        for (Level level : levels) {
+            copiedLevels.add(level.copy()); // Copy each level
+        }
+
+        copy.levels = copiedLevels; // Assign the copied levels to the new network
+
+        return copy;
+    }
+
 }
