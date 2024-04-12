@@ -205,13 +205,15 @@ public class Sensor {
 
                 graphics2D.setColor(Color.BLACK);
 
-                if (this.rays.size()> i) {
-                    graphics2D.drawLine(
-                            (int) this.rays.get(i).getEndX(),
-                            (int) this.rays.get(i).getEndY(),
-                            end.get("x").intValue(),
-                            end.get("y").intValue()
-                    );
+                if (this.rays.size() > i) {
+                    if (this.rays.get(i) != null) {
+                        graphics2D.drawLine(
+                                (int) this.rays.get(i).getEndX(),
+                                (int) this.rays.get(i).getEndY(),
+                                end.get("x").intValue(),
+                                end.get("y").intValue()
+                        );
+                    }
                 }
 
             }

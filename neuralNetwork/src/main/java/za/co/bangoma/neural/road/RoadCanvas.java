@@ -72,11 +72,11 @@ public class RoadCanvas extends Canvas implements KeyListener {
 
         traffic = new Car[] {
                 new Car(getLaneCentre(0), starting_y, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
-                new Car(getLaneCentre(2), starting_y - 60, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(2), starting_y - 180, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
                 new Car(getLaneCentre(1), starting_y - 180, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
                 new Car(getLaneCentre(0), starting_y - 330, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
                 new Car(getLaneCentre(1), starting_y - 370, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
-                new Car(getLaneCentre(2), starting_y - 200, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{})
+                new Car(getLaneCentre(2), starting_y - 500, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{})
         };
 
         cars = generateCars(N, starting_y);
@@ -90,7 +90,7 @@ public class RoadCanvas extends Canvas implements KeyListener {
                     cars[i].setBrain(bestBrain.copy());
                 } else if (i != 0) {
                     // Create a new instance of the best brain and mutate it
-                    NeuralNetwork mutatedBrain = NeuralNetwork.mutate(bestBrain.copy(), 0.1987); // Use .copy() to create a unique copy of the bestBrain
+                    NeuralNetwork mutatedBrain = NeuralNetwork.mutate(bestBrain.copy(), 0.2); // Use .copy() to create a unique copy of the bestBrain
                     cars[i].setBrain(mutatedBrain);
                 }
             }

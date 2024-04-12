@@ -141,9 +141,9 @@ public class NetworkCanvas extends Canvas {
         if (outputs.isEmpty()) {
             ArrayList<Double> finalOutputs = new ArrayList<>();
             finalOutputs.add(this.roadCanvas.getBestCar().isShouldMoveForward() ? 1.0 : 0.0);
-            finalOutputs.add(this.roadCanvas.getBestCar().isShouldMoveBackward() ? 1.0 : 0.0);
             finalOutputs.add(this.roadCanvas.getBestCar().isShouldMoveLeft() ? 1.0 : 0.0);
             finalOutputs.add(this.roadCanvas.getBestCar().isShouldMoveRight() ? 1.0 : 0.0);
+            finalOutputs.add(this.roadCanvas.getBestCar().isShouldMoveBackward() ? 1.0 : 0.0);
 
             int nodeRadius = 30; // ALso known as the "neuronal soma" radius,
             // (that's just my understanding, not common practice)

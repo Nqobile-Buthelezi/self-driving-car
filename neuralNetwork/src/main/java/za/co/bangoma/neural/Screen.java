@@ -48,6 +48,7 @@ public class Screen extends Frame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 roadCanvas.startAnimation();
+                networkCanvas.setVisible(true); // Show the network canvas when "Start" is clicked
             }
         });
 
@@ -75,6 +76,7 @@ public class Screen extends Frame {
         add(roadCanvas);
 
         networkCanvas = new NetworkCanvas(HEIGHT, roadCanvas);
+        networkCanvas.setVisible(false); // Initially hide the network canvas
         add(networkCanvas);
 
         // Set the width and height of our Frame/Screen

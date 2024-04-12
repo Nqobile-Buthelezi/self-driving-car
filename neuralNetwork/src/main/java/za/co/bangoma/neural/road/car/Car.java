@@ -268,9 +268,9 @@ public class Car implements Vehicle, Drawable {
                 double threshold = 0.0; // Adjust this threshold as needed
 
                 shouldMoveForward = this.brain.getOutputs().get(0) > threshold;
-                shouldMoveBackward = this.brain.getOutputs().get(1) > threshold;
-                shouldMoveLeft = this.brain.getOutputs().get(2) > threshold;
-                shouldMoveRight = this.brain.getOutputs().get(3) > threshold; // Ensure you use the correct index
+                shouldMoveLeft = this.brain.getOutputs().get(1) > threshold;
+                shouldMoveRight = this.brain.getOutputs().get(2) > threshold; // Ensure you use the correct index
+                shouldMoveBackward = this.brain.getOutputs().get(3) > threshold;
 
                 outputs.clear();
             }
