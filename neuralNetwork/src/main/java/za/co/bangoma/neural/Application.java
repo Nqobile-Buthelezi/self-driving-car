@@ -19,7 +19,7 @@ public class Application {
      * @param args The command-line arguments passed to the application (currently unused).
      */
     public static void main(String[] args) {
-        createScreen(false);
+        Screen s = createScreen(false);
     }
 
     /**

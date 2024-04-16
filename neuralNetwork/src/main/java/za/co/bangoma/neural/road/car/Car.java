@@ -94,6 +94,10 @@ public class Car implements Vehicle, Drawable {
         return height;
     }
 
+    public String getControlType() {
+        return this.controlType;
+    }
+
     public NeuralNetwork getBrain() {
         return brain;
     }
@@ -258,6 +262,11 @@ public class Car implements Vehicle, Drawable {
             updatePosition(); // Update the car's position
             if (this.controlType.equals("CONTROL")) {
                 this.sensor.update(this.roadBorders, this.traffic);
+
+                this.shouldMoveForward = this.controls.isForward();
+                this.shouldMoveBackward = this.controls.isBack();
+                this.shouldMoveLeft = this.controls.isLeft();
+                this.shouldMoveRight = this.controls.isRight();
             } else if (this.controlType.equals("AI")) {
                 ArrayList<Double> outputs;
                 this.sensor.update(this.roadBorders, this.traffic);

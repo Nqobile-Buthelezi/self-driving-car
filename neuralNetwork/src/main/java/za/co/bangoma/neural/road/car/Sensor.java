@@ -32,18 +32,6 @@ public class Sensor {
         return rayCount;
     }
 
-    public double getRaySpread() {
-        return raySpread;
-    }
-
-    public int getRayLength() {
-        return rayLength;
-    }
-
-    public ArrayList<RayCoordinates> getRays() {
-        return rays;
-    }
-
     public ArrayList<Hashtable<String, Double>> getOffsetReadings() {
         return readings;
     }
@@ -137,7 +125,6 @@ public class Sensor {
             Point startingPoint = new Point((int) myRay.getStartX(), (int) myRay.getStartY());
             Point endingPoint = new Point((int) myRay.getEndX(), (int) myRay.getEndY());
 
-
             Point[] myPoints = {startingPoint, endingPoint};
 
             Hashtable<String, Double> emptyReading = new Hashtable<>();
@@ -145,19 +132,15 @@ public class Sensor {
             emptyReading.put("y", myRay.getEndY());
             emptyReading.put("offset", 0.0);
 
-            this.readings.add(
-                    this.getReadings(
-                            myPoints,
-                            roadBorders,
-                            traffic
-                    ) != null ? this.getReadings(
-                            myPoints,
-                            roadBorders,
-                            traffic
-                    ) : emptyReading
-            );
+            Hashtable<String, Double> reading = this.getReadings(myPoints, roadBorders, traffic);
+            if (reading != null) {
+                this.readings.add(reading);
+            } else {
+                this.readings.add(emptyReading);
+            }
         }
     }
+
 
     public void draw(Graphics2D graphics2D) {
         if (!this.rays.isEmpty() && !this.readings.isEmpty()) {
@@ -166,60 +149,35 @@ public class Sensor {
 
             // Creates a new BasicStroke with the desired thickness
             Stroke oldStroke = graphics2D.getStroke();
-
             graphics2D.setStroke(new BasicStroke(strokeWidth));
 
             for (int i = 0; i < this.rayCount; i++) {
+                // Check if both rays and readings have elements at index i
+                if (i < this.rays.size() && i < this.readings.size()) {
+                    RayCoordinates ray = this.rays.get(i);
+                    Hashtable<String, Double> reading = this.readings.get(i);
 
-                // Create endpoint for ray
-                Hashtable<String, Double> end = new Hashtable<>();
-                if (this.rays.size() > i) {
-                    end.put("x", this.rays.get(i).getEndX());
-                    end.put("y", this.rays.get(i).getEndY());
-                }
-
-                if (i >= this.readings.size()) {
-                    // index does not exist
-                    continue;
-                } else {
-                    // index exists
-                    // If there is a reading coordinate of the intercept
+                    // If there is a reading coordinate of the intercept,
                     // make that coordinate our new end coordinate
-                    if ((i < this.readings.size()) && (this.readings.get(i) != null)) {
-                        end.put("x", this.readings.get(i).get("x"));
-                        end.put("y", this.readings.get(i).get("y"));
+                    double endX = ray.getEndX();
+                    double endY = ray.getEndY();
+
+                    if (reading != null) {
+                        endX = reading.getOrDefault("x", endX);
+                        endY = reading.getOrDefault("y", endY);
                     }
+
+                    graphics2D.setColor(Color.YELLOW);
+                    graphics2D.drawLine((int) ray.getStartX(), (int) ray.getStartY(), (int) endX, (int) endY);
+
+                    graphics2D.setColor(Color.BLACK);
+                    graphics2D.drawLine((int) ray.getEndX(), (int) ray.getEndY(), (int) endX, (int) endY);
                 }
-
-                graphics2D.setColor(Color.YELLOW);
-
-                if (this.rays.size()> i) {
-                    graphics2D.drawLine(
-                            (int) this.rays.get(i).getStartX(),
-                            (int) this.rays.get(i).getStartY(),
-                            end.get("x").intValue(),
-                            end.get("y").intValue()
-                    );
-                }
-
-
-                graphics2D.setColor(Color.BLACK);
-
-                if (this.rays.size() > i) {
-                    if (this.rays.get(i) != null) {
-                        graphics2D.drawLine(
-                                (int) this.rays.get(i).getEndX(),
-                                (int) this.rays.get(i).getEndY(),
-                                end.get("x").intValue(),
-                                end.get("y").intValue()
-                        );
-                    }
-                }
-
             }
 
             graphics2D.setStroke(oldStroke);
         }
     }
+
 }
 

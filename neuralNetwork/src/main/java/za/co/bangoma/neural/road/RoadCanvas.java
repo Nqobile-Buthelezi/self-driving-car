@@ -1,6 +1,5 @@
 package za.co.bangoma.neural.road;
 
-import com.google.gson.GsonBuilder;
 import za.co.bangoma.neural.Utils;
 import za.co.bangoma.neural.network.NeuralNetwork;
 import za.co.bangoma.neural.road.car.Car;
@@ -34,10 +33,9 @@ public class RoadCanvas extends Canvas implements KeyListener {
     private final String BEST_BRAIN_FILE = "best_brain.json";
     int ROAD_TOP = -100000;
     int ROAD_BOTTOM = 100000;
-    int N = 100;
+    int N = 1;
 
     private Timer timer;
-    private Car myCar;
     private Car[] traffic;
     private Car[] cars;
     private Car bestCar;
@@ -76,7 +74,12 @@ public class RoadCanvas extends Canvas implements KeyListener {
                 new Car(getLaneCentre(1), starting_y - 180, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
                 new Car(getLaneCentre(0), starting_y - 330, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
                 new Car(getLaneCentre(1), starting_y - 370, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
-                new Car(getLaneCentre(2), starting_y - 500, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{})
+                new Car(getLaneCentre(2), starting_y - 500, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(0), starting_y - 540, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(1), starting_y - 660, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(2), starting_y - 700, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(1), starting_y - 895, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{}),
+                new Car(getLaneCentre(2), starting_y - 800, 30, 50, Color.RED, 2, "TRAFFIC", new ArrayList<Point[]>(), new Car[]{})
         };
 
         cars = generateCars(N, starting_y);
@@ -86,12 +89,14 @@ public class RoadCanvas extends Canvas implements KeyListener {
         // Mutate cars' brains except for the best car
         if (bestBrain != null) {
             for (int i = 0; i < cars.length; i++) {
-                if (i == 0) {
-                    cars[i].setBrain(bestBrain.copy());
-                } else if (i != 0) {
-                    // Create a new instance of the best brain and mutate it
-                    NeuralNetwork mutatedBrain = NeuralNetwork.mutate(bestBrain.copy(), 0.2); // Use .copy() to create a unique copy of the bestBrain
-                    cars[i].setBrain(mutatedBrain);
+                if (cars[i].getControlType().equals("AI")) {
+                    if (i == 0) {
+                        cars[i].setBrain(bestBrain.copy());
+                    } else if (i != 0) {
+                        // Create a new instance of the best brain and mutate it
+                        NeuralNetwork mutatedBrain = NeuralNetwork.mutate(bestBrain.copy(), 0.0131313); // Use .copy() to create a unique copy of the bestBrain
+                        cars[i].setBrain(mutatedBrain);
+                    }
                 }
             }
         }
@@ -138,6 +143,7 @@ public class RoadCanvas extends Canvas implements KeyListener {
                 new Point(left, top),     // Top left
                 new Point(left, bottom)  // Bottom left
         });
+
         roadBarrier.add(new Point[] {
                 new Point(right, top),    // Top right
                 new Point(right, bottom)  // Bottom right

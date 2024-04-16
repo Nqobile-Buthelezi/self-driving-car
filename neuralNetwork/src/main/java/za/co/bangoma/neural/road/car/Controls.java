@@ -44,16 +44,16 @@ public class Controls {
 
         switch (keyCode) {
             case KeyEvent.VK_UP:
-                this.forward = true;
+                setForward(true);
                 break;
             case KeyEvent.VK_DOWN:
-                this.back = true;
+                setBack(true);
                 break;
             case KeyEvent.VK_LEFT:
-                this.left = true;
+                setLeft(true);
                 break;
             case KeyEvent.VK_RIGHT:
-                this.right = true;
+                setRight(true);
                 break;
         }
     }
@@ -63,16 +63,16 @@ public class Controls {
 
         switch (keyCode) {
             case KeyEvent.VK_UP:
-                this.forward = false;
+                setForward(false);
                 break;
             case KeyEvent.VK_DOWN:
-                this.back = false;
+                setBack(false);
                 break;
             case KeyEvent.VK_LEFT:
-                this.left = false;
+                setLeft(false);
                 break;
             case KeyEvent.VK_RIGHT:
-                this.right = false;
+                setRight(false);
                 break;
         }
     }

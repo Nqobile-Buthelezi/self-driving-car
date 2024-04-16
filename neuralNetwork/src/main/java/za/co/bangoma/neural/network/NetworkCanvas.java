@@ -157,13 +157,15 @@ public class NetworkCanvas extends Canvas {
                         int inputX = (int) getNodeX(inputs, i, left, right);
                         int outputX = (int) getNodeX(finalOutputs, j, left, right);
 
-                        drawDashedLine(
-                                graphics,
-                                inputX,
-                                bottom,
-                                outputX,
-                                (int) top
-                        );
+                        // Calculate dash offset based on time
+                        double time = System.currentTimeMillis();
+                        double frequency = 50; // Adjust the divisor for speed
+                        double dashPatternLength = 15; // Adjust as needed
+
+                        double dashOffset = (dashPatternLength - (time / frequency) % dashPatternLength) % dashPatternLength;
+
+                        // Draw the animated dashed line
+                        drawAnimatedDashedLine(graphics, inputX, bottom, outputX, (int) top, dashOffset);
                     }
                 }
 
@@ -173,7 +175,7 @@ public class NetworkCanvas extends Canvas {
                     graphics.setColor(Color.BLACK);
                     graphics.fillOval((int) x - (nodeRadius / 2), bottom - (nodeRadius / 2), nodeRadius, nodeRadius);
 
-                    if (inputs.size() > 1 && inputs.size() > i) {
+                    if (i < inputs.size()) {
                         graphics.setColor(Utils.getRGBA(inputs.get(i)));
                     }
                     graphics.fillOval((int) x - (nodeRadius / 2) + 6, bottom - (nodeRadius / 2) + 6, (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
@@ -190,11 +192,24 @@ public class NetworkCanvas extends Canvas {
                     }
                     graphics.fillOval((int) x - (nodeRadius / 2) + 6, (int) top - (nodeRadius / 2) + 6, (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
 
+                    // Calculate dash offset based on time
+                    double time = System.currentTimeMillis();
+                    double frequency = 50; // Adjust the divisor for speed
+                    double dashPatternLength = 15; // Adjust as needed
+
+                    double dashOffset = (dashPatternLength - (time / frequency) % dashPatternLength) % dashPatternLength;
+
+                    // Draw bias contour
+                    graphics.setColor(Utils.getRGBA(biases.get(i)));
+                    graphics.setStroke(new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                            0, new float[]{9}, (float) dashOffset));
+                    graphics.drawOval((int) x - (int) (nodeRadius * 0.8), (int) top - (int) (nodeRadius * 0.8), (int) (nodeRadius * 1.6), (int) (nodeRadius * 1.6));
+
                     if (i < strings.length) {
                         graphics.setColor(Color.WHITE);
                         Font originalFont = graphics.getFont();
                         graphics.setFont(originalFont.deriveFont(Font.BOLD, 20));
-                        // Set the desired font size here (20 in this example)
+                        // Sets the desired font size here (20 in this example)
                         FontMetrics fm = graphics.getFontMetrics();
                         int textWidth = fm.stringWidth(strings[i]);
                         int textHeight = fm.getHeight();
@@ -205,9 +220,6 @@ public class NetworkCanvas extends Canvas {
                         );
                         graphics.setFont(originalFont); // Restore the original font
                     }
-
-                    // Biases drawn as a contour around the output.
-
                 }
             }
         } else {
@@ -223,13 +235,15 @@ public class NetworkCanvas extends Canvas {
                         int inputX = (int) getNodeX(inputs, i, left, right);
                         int outputX = (int) getNodeX(outputs, j, left, right);
 
-                        drawDashedLine(
-                                graphics,
-                                inputX,
-                                bottom,
-                                outputX,
-                                (int) top
-                        );
+                        // Calculate dash offset based on time
+                        double time = System.currentTimeMillis();
+                        double frequency = 50; // Adjust the divisor for speed
+                        double dashPatternLength = 15; // Adjust as needed
+
+                        double dashOffset = (dashPatternLength - (time / frequency) % dashPatternLength) % dashPatternLength;
+
+                        // Draw the animated dashed line
+                        drawAnimatedDashedLine(graphics, inputX, bottom, outputX, (int) top, dashOffset);
                     }
                 }
 
@@ -256,23 +270,36 @@ public class NetworkCanvas extends Canvas {
                     }
                     graphics.fillOval((int) x - (nodeRadius / 2) + 6, (int) top - (nodeRadius / 2) + 6, (int) (nodeRadius * 0.6), (int) (nodeRadius * 0.6));
 
+                    // Calculate dash offset based on time
+                    double time = System.currentTimeMillis();
+                    double frequency = 50; // Adjust the divisor for speed
+                    double dashPatternLength = 15; // Adjust as needed
+
+                    double dashOffset = (dashPatternLength - (time / frequency) % dashPatternLength) % dashPatternLength;
+
                     // Biases drawn as a contour around the output.
+                    graphics.setColor(Utils.getRGBA(biases.get(i)));
+                    graphics.setStroke(new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                            0, new float[]{9}, (float) dashOffset));
+                    graphics.drawOval((int) x - (int) (nodeRadius * 0.8), (int) top - (int) (nodeRadius * 0.8), (int) (nodeRadius * 1.6), (int) (nodeRadius * 1.6));
+
                 }
             }
         }
 
     }
 
-    private void drawDashedLine(Graphics graphics, int x1, int y1, int x2, int y2) {
+    private void drawAnimatedDashedLine(Graphics2D graphics, int x1, int y1, int x2, int y2, double dashOffset) {
         // Create a copy of the Graphics instance
         Graphics2D g2d = (Graphics2D) graphics.create();
 
-        // Set the stroke of the copy, not the original
-        Stroke dashed = new BasicStroke(5, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
-                0, new float[]{9}, 0);
-        g2d.setStroke(dashed);
-        // Draw to the copy
+        // Set the dash pattern and offset dynamically
+        float[] dashPattern = {10, 5}; // Adjust dash and gap lengths as needed
+        g2d.setStroke(new BasicStroke(5, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, dashPattern, (float) dashOffset));
+
+        // Draw the line
         g2d.drawLine(x1, y1, x2, y2);
+
         // Get rid of the copy
         g2d.dispose();
     }
