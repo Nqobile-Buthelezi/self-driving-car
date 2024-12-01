@@ -1,6 +1,5 @@
 package za.co.bangoma.neural;
 
-
 // Importing Java AWT to start
 import java.awt.*;
 import java.awt.event.*;
