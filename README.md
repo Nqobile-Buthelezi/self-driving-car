@@ -1,6 +1,6 @@
 # Self-Driving Car Simulation
 
-This project is a **Java-based simulation of a self-driving car** that uses a neural network for decision-making. It is designed to demonstrate artificial intelligence principles in a portfolio-worthy format.
+This project is a **Java-based simulation of a self-driving car** that uses a neural network for decision-making. It is designed to demonstrate artificial intelligence principles.
 
 ## Features
 - **Neural Network Implementation:** A custom neural network framework with configurable layers and levels.
@@ -27,6 +27,7 @@ self-driving-car/
             ├── ApplicationTest.java
             ├── ScreenTest.java
             └── UtilsTest.java
+
 ## Prerequisites
 - Java JDK 11 or higher
 - Maven 3.8+
