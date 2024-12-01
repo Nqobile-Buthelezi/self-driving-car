@@ -27,7 +27,7 @@ self-driving-car/
             ├── ApplicationTest.java
             ├── ScreenTest.java
             └── UtilsTest.java
-'''
+```
 
 ## Prerequisites
 - Java JDK 11 or higher
